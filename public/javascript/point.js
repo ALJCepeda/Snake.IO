@@ -8,8 +8,9 @@ function Point(x, y) {
 	this.up = function() { return Point.up(this); };
 	this.down = function() { return Point.down(this); };
 	this.walk = function(direction, length) { return Point.walk(this, direction, length); };
-}
+	this.equals = function(point) { return Point.equals(this, point); };
 
+}
 Point.left = function(point) {
 	return new Point(point.x - 1, point.y);
 };
@@ -48,6 +49,9 @@ Point.walk = function(point, direction, length) {
 };
 Point.toString = function(point) {
 	return '('+point.x+','+point.y+')';
+}
+Point.equals = function(a, b) {
+	return (a.x === b.x) && (a.y === b.y);
 }
 
 if (typeof module !== "undefined" && module.exports) {

@@ -2,6 +2,11 @@ var assert = require('assert');
 var Point = require('./../public/javascript/point.js');
 
 describe('Point', function() {
+	describe('comparison', function() {
+		it('should equal', function() {
+			assert.equal(new Point(1,0).equals(new Point(1,0)), true);
+		});
+	});
 	describe('steps', function() {
 		it('should step left one space', function() {
 			assert.equal(new Point(1,0).left().toString(), '(0,0)');
