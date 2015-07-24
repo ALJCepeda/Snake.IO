@@ -1,16 +1,13 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var Point = require('./javascript/point.js');
+var Point = require('./scripts/point.js');
 
 app.usersConnected = 0;
-app.get('/', function(req, res){
-	res.sendFile(__dirname + '/views/index.html');
-});
 
-app.get('/index.html.js', function(req, res) {
-	res.sendFile(__dirname + '/javascript/index.html.js');
-});
+app.get('/', function(req, res){ res.sendFile(__dirname + '/views/index.html'); });
+app.get('/index.html.js', function(req, res) { res.sendFile(__dirname + '/scripts/index.html.js'); });
+app.get('/point.js', function(req, res) { res.sendFile(__dirname + '/scripts/point.js'); });
 
 http.listen(3000, function() {
 	console.log('listening on *:3000');

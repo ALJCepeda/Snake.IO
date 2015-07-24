@@ -17,7 +17,7 @@ $(document).ready(function(){
 	
 	function init() {
 		d = "right"; //default direction
-		create_snake();
+		create_snake(5, 5, 5, '');
 		create_food(); //Now we can see the food particle
 		//finally lets display the score
 		score = 0;
@@ -38,8 +38,6 @@ $(document).ready(function(){
 
 
 	});
-
-	function coordinates_inDirection(x, y, )
 	
 	function create_snake(x, y, length, direction) {
 		snake_array = []; //Empty array to start with
