@@ -3,23 +3,21 @@ function Snake(head, direction, length) {
 	 this.direction = direction;
 }
 
-Object.defineProperty(Snake.prototype, 'length', {
-	get:function() { return Snake.length(this); }
-});
 Object.defineProperty(Snake.prototype, 'head', {
 	get:function() { return Snake.head(this); }
 });
 Object.defineProperty(Snake.prototype, 'tail', {
 	get:function() { return Snake.tail(this); }
 });
+Object.defineProperty(Snake.prototype, 'next', {
+	get:function() { return Snake.next(this); }
+})
 
-Snake.prototype.next = function() { return Snake.next(this); };
 Snake.prototype.addHead = function() { return Snake.addHead(this); };
 Snake.prototype.popTail = function() { return Snake.popTail(this); };
 Snake.prototype.step = function() { return Snake.step(this); };
 Snake.prototype.setDirection = function(direction) { this.direction = direction; return this; };
 
-Snake.length = function(snake) { return snake.body.length; };
 Snake.head = function(snake) { return snake.body[0]; };
 Snake.tail = function(snake) { return snake.body[snake.body.length-1]; };
 
