@@ -1,5 +1,5 @@
-function Snake(head, direction) {
-	 this.body = head.walk(opposite(direction));
+function Snake(head, direction, length) {
+	 this.body = head.walk(opposite(direction), length-1);
 	 this.direction = direction;
 }
 
@@ -17,17 +17,17 @@ Snake.prototype.next = function() { return Snake.next(this); };
 Snake.prototype.addHead = function() { return Snake.addHead(this); };
 Snake.prototype.popTail = function() { return Snake.popTail(this); };
 Snake.prototype.step = function() { return Snake.step(this); };
+Snake.prototype.setDirection = function(direction) { this.direction = direction; return this; };
 
 Snake.length = function(snake) { return snake.body.length; };
 Snake.head = function(snake) { return snake.body[0]; };
-Snake.tail = function(snake) { return snake.body[snake.length-1]; };
+Snake.tail = function(snake) { return snake.body[snake.body.length-1]; };
 
 Snake.next = function(snake) { return snake.head.step(snake.direction); };
 Snake.addHead = function(snake) { snake.body.unshift(snake.next); return snake; };
 Snake.popTail = function(snake) { return snake.body.pop(); };
 Snake.step = function(snake) { 
-	snake.addHead();
-	snake.popTail();
+	snake.addHead().popTail();
 	return snake;
 };
 
@@ -38,4 +38,8 @@ function opposite(direction) {
 	};
 
 	return cases[direction] || '';
+}
+
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = Snake;
 }
