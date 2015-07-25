@@ -52,6 +52,7 @@ function gameIteration() {
 
 		cells = cells.concat(client.snake.body);
 	}
+	
 	io.emit('draw', { cells:cells });
 }
 
