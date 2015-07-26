@@ -162,7 +162,12 @@ $(document).ready(function(){
 
 	function timeSince_UTC(startTime) {
 		var clientTime = new Date((new Date().toUTCString())).getTime();
-		return clientTime - startTime;
+		var timeSince = clientTime - startTime;
+
+		//There's something weird going on where the time difference will deviate
+		//by exactly 1 second. I suspect this is a javscript issue.
+		//Since this only occurs with this specific value, we'll ignore it
+		return (timeSince === 1000 || timeSince === -1000) ? 0 : timeSince;
 	}
 
 	drawGrid();
