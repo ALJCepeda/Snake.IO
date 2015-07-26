@@ -72,7 +72,7 @@ $(document).ready(function(){
 
 		refreshCanvas();
 		resyncs++;
-		Console.log("Resync: "+resync);
+		console.log("Resync: "+resync);
 	});
 	
 	//Lets add the keyboard controls now
