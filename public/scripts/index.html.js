@@ -112,9 +112,9 @@ $(document).ready(function(){
 			}
 			
 			//We assume the client hasn't had a chance to undergo current iteration
-			if(itersSince > 1) {
+			if(itersSince > 0) {
 				//For the client to catch up to the server
-				for (var i = itersSince - 2; i >= 0; i--) {
+				for (var i = itersSince - 1; i >= 0; i--) {
 					gameIteration();
 					timer.count++;
 				};
