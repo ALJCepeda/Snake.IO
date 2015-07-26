@@ -60,8 +60,11 @@ io.on('connection', function(socket){
 		socket.emit('sync', {
 			id:clientid,
 			body:client.snake.body,
-			direction:client.snake.direction
+			direction:client.snake.direction,
+			iterations: gameTimer.portable()
 		});
+
+		console.log("Resync requested for: "+clientid+" originating from: "+socket.id)
 	})
 	
 	console.log('User connected, id: '+client.id+' total: '+connected);

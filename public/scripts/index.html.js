@@ -68,6 +68,8 @@ $(document).ready(function(){
 			body[i] = part;
 		};
 		snakes[id].body = body;
+		timer.count = data['iteration']['count'];
+		
 		refreshCanvas();
 	});
 	
