@@ -1,5 +1,5 @@
 function Snake(head, direction, length) {
-	 this.body = head.walk(opposite(direction), length-1);
+	 this.body = head.walk(opposite(direction), Snake.spawnSize);
 	 this.direction = direction;
 }
 
@@ -18,6 +18,7 @@ Snake.prototype.popTail = function() { return Snake.popTail(this); };
 Snake.prototype.step = function() { return Snake.step(this); };
 Snake.prototype.setDirection = function(direction) { this.direction = direction; return this; };
 
+Snake.spawnSize = 4;
 Snake.head = function(snake) { return snake.body[0]; };
 Snake.tail = function(snake) { return snake.body[snake.body.length-1]; };
 

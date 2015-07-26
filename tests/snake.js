@@ -29,6 +29,7 @@ describe('Snake', function() {
 			assert.equal(snake.head.toString(), '(5,5)');
 			assert.equal(snake.tail.toString(), '(1,5)');
 			assert.equal(snake.body.length, 5);
+			assert.equal(snake.next.toString(), '(6,5)');
 
 			snake.addHead();
 
