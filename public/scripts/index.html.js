@@ -115,7 +115,6 @@ $(document).ready(function(){
 					gameIteration();
 					timer.count++;
 				};
-				timer.count++;
 			}
 		}
 	}
