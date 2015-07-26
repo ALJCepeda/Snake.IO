@@ -14,7 +14,7 @@ $(document).ready(function(){
 	var cw = 10;
 	var score = 0;
 	var id = 0;
-
+	var resyncs = 0;
 	socket.on('configure', function(data) {
 		id = data['id'];
 
@@ -71,6 +71,8 @@ $(document).ready(function(){
 		timer.count = data['iteration']['count'];
 
 		refreshCanvas();
+		resyncs++;
+		Console.log("Resync: "+resync);
 	});
 	
 	//Lets add the keyboard controls now
