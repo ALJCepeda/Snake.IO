@@ -1,6 +1,7 @@
 function ClientUpdate() { 
 	this.clients = {};
 	this.iteration = {};
+	this.root = {};
 };
 
 ClientUpdate.prototype.toString = function() { return ClientUpdate.toString(this); };
@@ -23,10 +24,11 @@ ClientUpdate.clear = function(update) {
 };
 
 ClientUpdate.portable = function(update) {
-	return {
-		clients: update.clients,
-		iteration: update.iteration
-	};
+	var obj = update.root;
+	obj['clients'] = update.clients;
+	obj['iteration'] = update.iteration;
+	
+	return obj;
 };
 ClientUpdate.empty = function(update) {
 	for(var client in update.clients) {

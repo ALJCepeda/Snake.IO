@@ -21,6 +21,15 @@ Utility.direction_fromKeycode  = function (key) {
 	return cases[key] || '';
 }
 
+Utility.direction_opposite = function (direction) {
+	var cases = {
+		up:'down', down:'up',
+		left:'right',right:'left'
+	};
+
+	return cases[direction] || '';
+}
+
 if (typeof module !== "undefined" && module.exports) {
     module.exports = Utility;
 }

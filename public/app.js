@@ -49,25 +49,9 @@ io.on('connection', function(socket){
 			client.snake.direction = direction;
 
 			//Update clients with new state of snake
-			update.clients[client.id] = {
-				head:client.snake.next,
-				direction:client.snake.direction
-			}
+			update.clients[client.id] = client.snake.portable();
 		}
 	});
-
-	socket.on('sync', function(clientid) {
-		var client = clients[clientid];
-
-		socket.emit('sync', {
-			id:clientid,
-			body:client.snake.body,
-			direction:client.snake.direction,
-			iteration: gameTimer.portable()
-		});
-
-		console.log("Resync requested for: "+clientid+" originating from: "+socket.id)
-	})
 	
 	console.log('User connected, id: '+client.id+' total: '+connected);
 	configureClient(client.id);
@@ -76,9 +60,6 @@ io.on('connection', function(socket){
 
 var gameTimer = new Timer(Timer.gameTick);
 gameTimer.iteration = function() {
-	var last = this.last;
-	var count = this.count;
-
 	//Allow clients to process this iteration
 	for( var clientid in clients) {
 		clients[clientid].gameIteration();
@@ -96,29 +77,45 @@ function configureClient(clientid) {
 	var client = clients[clientid];
 
 	if(client) {
-		config = {
-			id:clientid
-		}
+		var config = new ClientUpdate();
+		var clientsInfo = clientsSnakes();
 
-		config['iteration'] = gameTimer.portable();
-		client.socket.emit('configure', config);
+		delete clientsInfo[clientid];
+
+		config.root = { id:clientid };
+		config.clients = clientsInfo;
+		config.iteration = gameTimer.portable();
+
+		client.socket.emit('configure', config.portable());
 	}
+}
+
+function clientsSnakes() {
+	var info = {};
+	for( var clientid in clients ) {
+		var client = clients[clientid];
+
+		if(client.snake) {
+			info[clientid] = client.snake.portable();
+		}
+	}
+
+	return info;
 }
 
 function spawn(clientid) {
 	var client = clients[clientid];
 
 	if(client) {
-		client.snake = new Snake(new Point(5, 5), 'right');
+		var direction = 'right';
+		var opposite = Utility.direction_opposite(direction);
+		var body = (new Point(5,5)).walk(opposite, Snake.spawnSize);
+		
+		client.snake = new Snake();
+		client.snake.body = body;
+		client.snake.direction = direction;
 
-		var spawn = new ClientUpdate();
-		spawn.clients[clientid] = {
-			head:client.snake.head,
-			direction:client.snake.direction
-		};
-
-		spawn.iteration = gameTimer.portable();
-		io.emit('spawn', spawn.portable());
+		update.clients[clientid] = client.snake.portable();
 	}
 }
 

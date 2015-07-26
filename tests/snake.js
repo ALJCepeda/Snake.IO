@@ -1,13 +1,18 @@
 var assert = require('assert');
 var Point = require('./../public/scripts/point.js');
 var Snake = require('./../public/scripts/snake.js');
+var Utility = require('./../public/scripts/utility.js');
 
 describe('Snake', function() {
 	describe('creation', function() {
 		it('should create a 5 cell snake in the left direction', function() {
-			var head = new Point(5, 5);
-			var snake = new Snake(head, 'right', 5);
-			var body = snake.body;
+			var direction = 'right';
+			var opposite = 'left';
+			var body = (new Point(5,5)).walk(opposite, Snake.spawnSize);
+
+			var snake = new Snake();
+			snake.body = body;
+			snake.direction = direction;
 
 			assert.equal(snake.head.toString(), '(5,5)');
 			assert.equal(body[1].toString(), '(4,5)');
@@ -23,8 +28,13 @@ describe('Snake', function() {
 
 	describe('mutation', function() {
 		it('should add a head to the snake', function() {
-			var head = new Point(5, 5);
-			var snake = new Snake(head, 'right', 5);
+			var direction = 'right';
+			var opposite = 'left'
+			var body = (new Point(5,5)).walk(opposite, Snake.spawnSize);
+
+			var snake = new Snake();
+			snake.body = body;
+			snake.direction = 'right';
 			
 			assert.equal(snake.head.toString(), '(5,5)');
 			assert.equal(snake.tail.toString(), '(1,5)');
@@ -46,8 +56,13 @@ describe('Snake', function() {
 		});
 
 		it('should move snake in the right direction', function() {
-			var head = new Point(5, 5);
-			var snake = new Snake(head, 'right', 5);
+			var direction = 'right';
+			var opposite = 'left';
+			var body = (new Point(5,5)).walk(opposite, Snake.spawnSize);
+
+			var snake = new Snake();
+			snake.body = body;
+			snake.direction = direction;
 
 			snake.step();
 
