@@ -53,6 +53,16 @@ io.on('connection', function(socket){
 			}
 		}
 	});
+
+	socket.on('sync', function(clientid) {
+		var client = clients[clientid];
+
+		socket.emit('sync', {
+			id:clientid,
+			body:client.snake.body,
+			direction:client.snake.direction
+		});
+	})
 	
 	console.log('User connected, id: '+client.id+' total: '+connected);
 	configureClient(client.id);

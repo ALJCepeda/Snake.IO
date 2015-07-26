@@ -53,10 +53,22 @@ $(document).ready(function(){
 			snake.direction = newDirection;
 
 			if(!snake.next.equals(newHead)) {
-				debugger;
 				//Need to update snake with new position. This really shouldn't happen as long as we're sync correctly
+				socket.emit('sync', clientid);
 			}
 		}
+	});
+
+	socket.on('sync', function(data) {
+		var id = data['id'];
+		var body = [];
+		for (var i = data['body'].length - 1; i >= 0; i--) {
+			var part = data['body'][i];
+			part = new Point(part.x, part.y);
+			body[i] = part;
+		};
+		snakes[id].body = body;
+		refreshCanvas();
 	});
 	
 	//Lets add the keyboard controls now
@@ -104,6 +116,9 @@ $(document).ready(function(){
 	}
 	
 	function gameIteration() {
+		refreshCanvas();	
+	}
+	function refreshCanvas() {
 		for(var clientid in snakes) {
 			var snake = snakes[clientid];
 			snake.step();
