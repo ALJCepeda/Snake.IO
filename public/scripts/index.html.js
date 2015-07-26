@@ -36,7 +36,7 @@ $(document).ready(function(){
 			var direction = spawnInfo['direction'];
 
 			snakes[clientid] = new Snake(head, direction, Snake.spawnSize);
-			drawSnake(snakes[clientid]);
+			console.log("Snake spawned for: " + clientid);
 		};
 	});
 
@@ -119,15 +119,18 @@ $(document).ready(function(){
 	}
 	
 	function gameIteration() {
-		refreshCanvas();	
-	}
-	function refreshCanvas() {
 		for(var clientid in snakes) {
 			var snake = snakes[clientid];
 			snake.step();
+		}
 
-			drawGrid();
-			drawSnake(snake);
+		refreshCanvas();
+	}
+	function refreshCanvas() {
+		drawGrid();
+
+		for(var clientid in snakes) {
+			drawSnake(snakes[clientid]);
 		}
 	}
 

@@ -28,7 +28,7 @@ var clients = [];
 var connected = 0;
 io.on('connection', function(socket){
 	//Record client connection
-	var client = new Client(socket, connected);
+	var client = new Client(socket);
 	clients[client.id] = client;
 	connected++;
 	
@@ -36,6 +36,7 @@ io.on('connection', function(socket){
 	socket.on('disconnect', function(){
 		delete clients[client.id];
 		connected--;
+
 		console.log('User disconnected, id '+client.id+' total: '+connected);
 	});
 
