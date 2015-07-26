@@ -1,4 +1,5 @@
-var socket = io();		
+var socket = io();
+var resyncs = 0;		
 $(document).ready(function(){
 	//Canvas stuff
 	var canvas = $("#canvas")[0];
@@ -14,7 +15,7 @@ $(document).ready(function(){
 	var cw = 10;
 	var score = 0;
 	var id = 0;
-	var resyncs = 0;
+	
 	socket.on('configure', function(data) {
 		id = data['id'];
 
