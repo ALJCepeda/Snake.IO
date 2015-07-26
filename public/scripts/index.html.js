@@ -81,7 +81,10 @@ $(document).ready(function(){
 		var key = e.which;
 		var cases = [37,38,39,40];
 
-		if(cases.indexOf(key) != -1 && lockKey[key] !== true) {
+		if(		cases.indexOf(key) != -1 
+			&&  lockKey[key] !== true 
+			&&  Utility.direction_fromKeycode(key) != snakes[id].direction ) {
+			
 			lockKey[key] = true;
 			socket.emit('keydown', key);
 		}

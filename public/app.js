@@ -19,6 +19,7 @@ app.get('/index.html.js', function(req, res) { res.sendFile(__dirname + '/script
 app.get('/point.js', function(req, res) { res.sendFile(__dirname + '/scripts/point.js'); });
 app.get('/snake.js', function(req, res) { res.sendFile(__dirname + '/scripts/snake.js'); });
 app.get('/timer.js', function(req, res) { res.sendFile(__dirname + '/scripts/timer.js'); });
+app.get('/utility.js', function(req, res) { res.sendFile(__dirname + '/scripts/utility.js'); });
 
 //Server
 http.listen(3000, function() { console.log('listening on *:3000'); });
