@@ -178,7 +178,7 @@ $(document).ready(function(){
 		//unlikely that they will consistently deviate by whole seconds.
 		//Ignoring these values doesn't seem to impose any issues on the synchronization
 		//We'll keep track of whenever the client is forced to resync to see if this causes us problems
-		return (timeSince % 1000) ? 0 : timeSince;
+		return (timeSince % 1000 == 0) ? 0 : timeSince;
 	}
 
 	drawGrid();
