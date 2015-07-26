@@ -52,7 +52,7 @@ $(document).ready(function(){
 			var snake = snakes[clientid];
 			snake.direction = newDirection;
 
-			if(!snake.next.equals(newHead)) {
+			if(snake.next.equals(newHead)) {
 				//Need to update snake with new position. This really shouldn't happen as long as we're sync correctly
 				socket.emit('sync', clientid);
 			}
@@ -69,7 +69,7 @@ $(document).ready(function(){
 		};
 		snakes[id].body = body;
 		timer.count = data['iteration']['count'];
-		
+
 		refreshCanvas();
 	});
 	

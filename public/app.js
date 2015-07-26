@@ -61,7 +61,7 @@ io.on('connection', function(socket){
 			id:clientid,
 			body:client.snake.body,
 			direction:client.snake.direction,
-			iterations: gameTimer.portable()
+			iteration: gameTimer.portable()
 		});
 
 		console.log("Resync requested for: "+clientid+" originating from: "+socket.id)
