@@ -36,8 +36,7 @@ Timer.portable = function(timer) {
 	};
 }
 
-Timer.gameTick = 60;//ms
-Timer.clientOffset = 20; //Client 
+Timer.gameTick = 120;//ms
 if (typeof module !== "undefined" && module.exports) {
     module.exports = Timer;
 }
