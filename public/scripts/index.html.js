@@ -11,59 +11,56 @@ $(document).ready(function(){
 	
 	var timer = new Timer();
 	timer.iteration = gameIteration;
-	timer.update(Timer.gameTick);
-	timer.start();
 
 	//Lets save the cell width in a variable for easy control
 	var cw = 10;
 	var score = 0;
 	var id = 0;
+
+	var updates = {};
 	
 	//This is where the server configures the client
 	//This is also where everything is initliazed
 	socket.on('configure', function(data) {
 		id = data['id'];
 		timer.count = data['iteration']['count'];
+		timer.update(Timer.gameTick);
+
+		updateTimer(data['iteration']);
+		timer.start();
 	});
 
 	socket.on('update', function(data) {
-		syncTimer(data);
-		updateSnakes(data['clients']);
+		//Save update for later
+		var count = data['iteration']['count'];
+		updates[count] = data['clients'];
+
+		//Force client to perform any missing iterations
+		updateTimer(data['iteration']); 
 	});
-
-	function updateSnakes(clients) {
-		for( var clientid in clients ) {
-			var clientBody = clients[clientid]['body'];
-			var direction = clients[clientid]['direction'];
-
-			var body = [];
-			for (var i = clientBody.length - 1; i >= 0; i--) {
-				var part = clientBody[i];
-				part = new Point(part.x, part.y);
-				body[i] = part;
-			}
-
-			if(!snakes[clientid]) {
-				snakes[clientid] = new Snake();
-			}
-
-			snakes[clientid].body = body;
-			snakes[clientid].direction = direction;
-		}
-	}
 	
+	socket.on('sync', function(data) {
+		updateTimer(data['iteration']);
+		updateSnakes(data['clients']);
+	})
 	//Lets add the keyboard controls now
 	var lockKey = { };
 	$(document).keydown(function(e) {
 		var key = e.which;
 		var cases = [37,38,39,40];
-		
+
 		if(		cases.indexOf(key) != -1 
 			&&  lockKey[key] !== true 
 			&&  Utility.direction_fromKeycode(key) != snakes[id].direction ) {
-			
+			var data = {};
 			lockKey[key] = true;
-			socket.emit('keydown', key);
+
+			data['keycode'] = key;
+			data['iteration'] = timer.portable();
+			console.log("Position: " + snakes[id].head);
+
+			//The direction change will be applied on the server's next iteration
+			socket.emit('keydown', data);
 		}
 	});
 
@@ -75,27 +72,32 @@ $(document).ready(function(){
 		}
 	})
 
-	function syncTimer(data) {
-		if(data.hasOwnProperty('iteration')) {
-			var timeSince = timeSince_UTC(data['iteration']['last']);
-			var itersSince = data['iteration']['count'] - timer.count;
+	function updateTimer(iteration) {
+		var timeSince = timeSince_UTC(iteration['last']);
+		//Client should always be behind the server by atleast one iteration
+		var itersSince = (iteration['count'] - timer.count) - 1;
 
-			console.log("Time since: " + timeSince);
-			console.log("Iterations since: " + itersSince);
+		console.log("Time since: " + timeSince);
+		console.log("Iterations since: " + itersSince);
 
-			if(timeSince > 0) {
-				timer.update(Timer.gameTick - timeSince);
-				timer.start();
-			}
-			
+		if(timeSince > 0) {
+			timer.update(Timer.gameTick - timeSince);
+			timer.start();
+		}
+		
+
+		if(itersSince < 0) {
+			//Somehow the client progressed further than the server
+			//We need to force the client to resync with the server
+			socket.emit('sync', id);
+		} else {
+			//We need the client to catch up to the next update
 			//We assume the client hasn't had a chance to undergo current iteration
-			if(itersSince > 0) {
-				//For the client to catch up to the server
-				for (var i = itersSince - 1; i >= 0; i--) {
-					gameIteration();
-					timer.count++;
-				};
-			}
+			//For the client to catch up to the server
+			for (var i = itersSince - 1; i >= 0; i--) {
+				gameIteration();
+				timer.count++;
+			};
 		}
 	}
 	
@@ -104,6 +106,11 @@ $(document).ready(function(){
 			var snake = snakes[clientid];
 			snake.step();
 		}
+
+		if(updates[timer.count]) {
+			updateSnakes(updates[timer.count]);	
+			delete updates[timer.count];
+		}                  
 
 		refreshCanvas();
 	}
@@ -155,5 +162,26 @@ $(document).ready(function(){
 		//Ignoring these values doesn't seem to impose any issues on the synchronization
 		//We'll keep track of whenever the client is forced to resync to see if this causes us problems
 		return (timeSince % 1000 == 0) ? 0 : timeSince;
+	}
+
+	function updateSnakes(clients) {
+		for( var clientid in clients ) {
+			var clientBody = clients[clientid]['snake']['body'];
+			var direction = clients[clientid]['snake']['direction'];
+
+			var body = [];
+			for (var i = clientBody.length - 1; i >= 0; i--) {
+				var part = clientBody[i];
+				part = new Point(part.x, part.y);
+				body[i] = part;
+			}
+
+			if(!snakes[clientid]) {
+				snakes[clientid] = new Snake();
+			}
+
+			snakes[clientid].body = body;
+			snakes[clientid].direction = direction;
+		}
 	}
 });

@@ -11,7 +11,8 @@ var ClientUpdate = require('./scripts/clientupdate.js');
 
 //Whenever an update is made, we save the changes and only send
 //the updates on the next game iteration
-var update = new ClientUpdate();
+var clientUpdate = new ClientUpdate();
+var updates = {};
 
 //Router
 app.get('/', function(req, res){ res.sendFile(__dirname + '/views/index.html'); });
@@ -28,6 +29,8 @@ http.listen(3000, function() { console.log('listening on *:3000'); });
 var clients = [];
 var connected = 0;
 io.on('connection', function(socket){
+	console.log('User connected, id: '+socket.id+' total: '+connected);
+
 	//Record client connection
 	var client = new Client(socket);
 	clients[client.id] = client;
@@ -42,18 +45,37 @@ io.on('connection', function(socket){
 	});
 
 	//Called when client presses a button
-	socket.on('keydown', function(key) {
-		var direction = Utility.direction_fromKeycode(key);
+	socket.on('keydown', function(data) {
+		var keycode = data['keycode'];
+		var direction = Utility.direction_fromKeycode(keycode);
 		if(direction && client.snake.direction != direction) {
-			//Change snake direction
-			client.snake.direction = direction;
+			var count = data['iteration']['count'];
+			var itersSince = count - gameTimer.count;
 
-			//Update clients with new state of snake
-			update.clients[client.id] = client.snake.portable();
+			if(itersSince > 0) {
+				//Client has progressed further than the client, save this update for later
+				if(!updates[count]) 
+					updates[count] = {};
+				updates[count][client.id] = direction;
+			} else {
+				//Update it for next iteration
+				updateDirection(client.id, direction);
+			}
+
+			console.log('Keycode: ' +keycode+ ' client count: ' +data['iteration']['count']+ ' server count: ' +gameTimer.count );
+			console.log('Position: ' +client.snake.head);
 		}
 	});
+
+	socket.on('sync', function(clientid) {
+		var syncUpdate = new ClientUpdate();
+		allSnakes(syncUpdate);
+		syncUpdate.iteration = gameTimer.portable();
+
+		socket.emit('sync', syncUpdate.portable());
+	});
 	
-	console.log('User connected, id: '+client.id+' total: '+connected);
+	
 	configureClient(client.id);
 	spawn(client.id);
 });
@@ -61,15 +83,45 @@ io.on('connection', function(socket){
 var gameTimer = new Timer(Timer.gameTick);
 gameTimer.iteration = function() {
 	//Allow clients to process this iteration
+
 	for( var clientid in clients) {
-		clients[clientid].gameIteration();
+		var client = clients[clientid];
+		client.gameIteration();
+
+		if(updates[gameTimer.count] && updates[gameTimer.count][clientid]) {
+			updateDirection(clientid, updates[gameTimer.count][clientid]);
+		}
+
+		if(client.needsUpdate) {
+			clientUpdate.updateSnake(clientid, client.snake);
+			client.needsUpdate = false;
+		}
 	}
 
-	//If any update occurred since the last iteration, broadcast them
-	if(!update.empty()){
-		update.iteration = gameTimer.portable();
-		io.emit('update', update.portable());
-		update.clear();
+	delete updateDirection[gameTimer.count];
+
+	//If any clientUpdate occurred since the last iteration, broadcast them
+	if(!clientUpdate.empty()){
+		sendUpdate(function() { clientUpdate.clear(); });
+	}
+}
+
+function sendUpdate(completed) {
+	//Send the clientUpdate after the offset has expired
+	//This will ensure the server has processed this iteration before the client
+	setTimeout(function() {
+		clientUpdate.iteration = gameTimer.portable();
+		io.emit('update', clientUpdate.portable());
+		completed();
+	}, Timer.clientOffset);
+}
+
+function updateDirection(clientid, direction) {
+	var client = clients[clientid];
+
+	if(client) {
+		client.snake.direction = direction;
+		client.needsUpdate = true;
 	}
 }
 
@@ -78,29 +130,26 @@ function configureClient(clientid) {
 
 	if(client) {
 		var config = new ClientUpdate();
-		var clientsInfo = clientsSnakes();
-
-		delete clientsInfo[clientid];
+		allSnakes(config);
 
 		config.root = { id:clientid };
-		config.clients = clientsInfo;
+		config.removeClient(clientid);
 		config.iteration = gameTimer.portable();
 
-		client.socket.emit('configure', config.portable());
+		setTimeout(function() {
+			client.socket.emit('configure', config.portable());	
+		}, Timer.clientOffset);
 	}
 }
 
-function clientsSnakes() {
-	var info = {};
+function allSnakes(clientUpdate) {
 	for( var clientid in clients ) {
 		var client = clients[clientid];
 
 		if(client.snake) {
-			info[clientid] = client.snake.portable();
+			clientUpdate.updateSnake(clientid, client.snake);
 		}
 	}
-
-	return info;
 }
 
 function spawn(clientid) {
@@ -115,7 +164,7 @@ function spawn(clientid) {
 		client.snake.body = body;
 		client.snake.direction = direction;
 
-		update.clients[clientid] = client.snake.portable();
+		client.needsUpdate = true;
 	}
 }
 
