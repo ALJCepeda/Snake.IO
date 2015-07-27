@@ -91,18 +91,6 @@ function drawPoint(point) {
 	ctx.strokeRect(x*cw, y*cw, cw, cw);
 }
 
-function timeSince_UTC(startTime) {
-	var clientTime = new Date((new Date().toUTCString())).getTime();
-	var timeSince = clientTime - startTime;
-
-	//There's something weird going on where the time difference will deviate by whole seconds
-	//While it's not unusual for the client/server clocks to deviate from each other, it's very
-	//unlikely that they will consistently deviate by whole seconds.
-	//Ignoring these values doesn't seem to impose any issues on the synchronization
-	//We'll keep track of whenever the client is forced to resync to see if this causes us problems
-	return (timeSince % 1000 == 0) ? 0 : timeSince;
-}
-
 function updateSnakes(clients) {
 	for( var clientid in clients ) {
 		var info = clients[clientid];
