@@ -1,7 +1,6 @@
 function Client(socket) {
 	this.id = socket.id;
 	this.socket = socket;
-	this.needsUpdate = false;
 	this.snake;
 
 	this.gameIteration = function() {

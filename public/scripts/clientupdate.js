@@ -1,12 +1,11 @@
 function ClientUpdate() { 
 	this.clients = {};
-	this.iteration = {};
 	this.root = {};
 };
 
 ClientUpdate.prototype.toString = function() { return ClientUpdate.toString(this); };
 ClientUpdate.prototype.clear = function() { ClientUpdate.clear(this); return this; };
-ClientUpdate.prototype.updateSnake = function(clientid, snake) { ClientUpdate.updateSnake(this, clientid, snake); };
+ClientUpdate.prototype.update = function(clientid, key, value) { ClientUpdate.update(this, clientid, key, value); };
 ClientUpdate.prototype.removeClient = function(clientid) { ClientUpdate.removeClient(this, clientid); };
 ClientUpdate.prototype.portable = function() { return ClientUpdate.portable(this); };
 ClientUpdate.prototype.empty = function() { return ClientUpdate.empty(this); };
@@ -25,22 +24,20 @@ ClientUpdate.removeClient = function(update, clientid) {
 		delete update.clients[clientid];
 	}
 }
-ClientUpdate.updateSnake = function(update, clientid, snake) {
+ClientUpdate.update = function(update, clientid, key, value) {
 	if(!update.clients[clientid]) {
 		update.clients[clientid] = {};
 	}
 
-	update.clients[clientid]['snake'] = snake.portable();	
+	update.clients[clientid][key] = value;	
 }
 ClientUpdate.clear = function(update) {
 	update.clients = {};
-	update.iteration = {};
 };
 
 ClientUpdate.portable = function(update) {
 	var obj = update.root;
 	obj['clients'] = update.clients;
-	obj['iteration'] = update.iteration;
 	
 	return obj;
 };
