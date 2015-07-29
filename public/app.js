@@ -29,12 +29,14 @@ var clientUpdate = new ClientUpdate();
 var grid = new Grid();
 
 io.on('connection', function(socket){
+	connected++;
 	console.log('User connected, id: '+socket.id+' total: '+connected);
 
 	//Record client connection
-	var client = new Client(socket);
+	var client = new Client();
+	client.id = socket.id;
+	client.socket = socket;
 	clients[client.id] = client;
-	connected++;
 	
 	//Called when this client disconnects
 	socket.on('disconnect', function(){
@@ -56,7 +58,7 @@ io.on('connection', function(socket){
 	spawn(client.id);
 });
 
-var gameTimer = new Timer(Timer.gameTick);
+var gameTimer = new Timer(90);
 gameTimer.iteration = function() {
 	//Allow clients to process this iteration
 
@@ -64,7 +66,6 @@ gameTimer.iteration = function() {
 		var client = clients[clientid];
 
 		if(client.snake) {
-			console.log(client.snake.head);
 			client.snake.step();
 			if(!grid.containsPoint(client.snake.head)) {
 				

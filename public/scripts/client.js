@@ -1,6 +1,6 @@
-function Client(socket) {
-	this.id = socket.id;
-	this.socket = socket;
+function Client() {
+	this.id;
+	this.socket
 	this.snake;
 
 	this.gameIteration = function() {

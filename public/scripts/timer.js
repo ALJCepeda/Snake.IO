@@ -1,6 +1,5 @@
 function Timer(milliseconds) {
 	this.countdown = milliseconds;
-	this.count = 0;
 	this.last = new Date((new Date().toUTCString()));	
 	this.id = 0;
 
@@ -8,7 +7,6 @@ function Timer(milliseconds) {
 	this.iteration = function() { };
     this._iteration = function () {
 	  that.last = new Date((new Date().toUTCString()));
-	  that.count++;
 	  that.iteration();
   };
 }
@@ -29,14 +27,7 @@ Timer.start = function(timer) {
 	timer.id = setInterval(timer._iteration, timer.countdown);
 	console.log("Timer id: " + timer.id);
 };
-Timer.portable = function(timer) {
-	return {
-		last:timer.last.getTime(),
-		count:timer.count
-	};
-}
 
-Timer.gameTick = 90;//ms
 if (typeof module !== "undefined" && module.exports) {
     module.exports = Timer;
 }
