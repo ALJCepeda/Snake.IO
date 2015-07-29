@@ -20,13 +20,22 @@ app.get('/timer.js', function(req, res) { res.sendFile(__dirname + '/scripts/tim
 app.get('/utility.js', function(req, res) { res.sendFile(__dirname + '/scripts/utility.js'); });
 
 //Server
-http.listen(3001, function() { console.log('listening on *:3000'); });
+http.listen(3000, function() { console.log('listening on *:3000'); });
 
 //App logic
 var clients = [];
 var connected = 0;
 var clientUpdate = new ClientUpdate();
 var grid = new Grid();
+grid.pointWidth = 50;
+grid.cellWidth = 10;
+
+app.get('/info', function(req, res) {
+	res.json({
+		pointWidth:grid.pointWidth,
+		cellWidth:grid.cellWidth
+	});
+});
 
 io.on('connection', function(socket){
 	connected++;
