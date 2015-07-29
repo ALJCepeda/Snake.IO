@@ -31,9 +31,14 @@ grid.pointWidth = 50;
 grid.cellWidth = 10;
 
 app.get('/info', function(req, res) {
+	res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+
 	res.json({
 		pointWidth:grid.pointWidth,
-		cellWidth:grid.cellWidth
+		cellWidth:grid.cellWidth,
+		htmlWidth:grid.htmlWidth()
 	});
 });
 

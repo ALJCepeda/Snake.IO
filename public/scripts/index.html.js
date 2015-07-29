@@ -73,6 +73,9 @@ document.addEventListener('keydown', function(e) {
 		//The direction change will be applied on the server's next iteration
 		keypress.push(key);
 		lastKey = key;
+
+		e.preventDefault();
+	    return false;
 	}
 });
 
