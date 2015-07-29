@@ -129,7 +129,7 @@ function spawn(clientid) {
 	if(client) {
 		var direction = 'right';
 		var opposite = Utility.direction_opposite(direction);
-		var body = (new Point(5,5)).walk(opposite, 4);
+		var body = (new Point(5,5)).walk(opposite, 100);
 
 		var snake = new Snake();
 		for( var part in body ) {
