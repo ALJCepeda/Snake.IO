@@ -129,11 +129,7 @@ function updateSnakes(clients) {
 	for( var clientid in clients ) {
 		var info = clients[clientid];
 
-		if(!snakes[clientid]) {
-			snakes[clientid] = new Snake();
-		}
-
-		if(info['direction']) {
+		if(info['direction'] && snakes[clientid]) {
 			snakes[clientid].direction = info['direction'];
 		}
 	}

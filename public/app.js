@@ -49,8 +49,11 @@ io.on('connection', function(socket){
 	//Called when client presses a button
 	socket.on('keydown', function(keycode) {
 		var direction = Utility.direction_fromKeycode(keycode);
-		if(direction && client.snake.direction != direction && client.snake.direction != Utility.direction_opposite(direction)) {
-			updateDirection(client.id, direction);
+
+		if(client.snake) {
+			if(direction && client.snake.direction != direction && client.snake.direction != Utility.direction_opposite(direction)) {
+				updateDirection(client.id, direction);
+			}
 		}
 	});
 	
@@ -66,15 +69,15 @@ gameTimer.iteration = function() {
 		var client = clients[clientid];
 
 		if(client.snake) {
-			client.snake.step();
-			if(!grid.containsPoint(client.snake.head)) {
-				
+			if(!grid.containsPoint(client.snake.next) || client.snake.containsPoint(client.snake.next)) {
 				client.snake = null;
 				io.emit('collision', clientid);
 			} else {
-				if(grid.removeFood(client.snake.head)) {
+				if(grid.removeFood(client.snake.next)) {
 					//Client just ate food
 				}
+
+				client.snake.step();
 			}
 		}
 	}
@@ -126,11 +129,15 @@ function spawn(clientid) {
 	if(client) {
 		var direction = 'right';
 		var opposite = Utility.direction_opposite(direction);
-		var body = (new Point(5,5)).walk(opposite, Snake.spawnSize);
+		var body = (new Point(5,5)).walk(opposite, 4);
+
+		var snake = new Snake();
+		for( var part in body ) {
+			snake.pushPart(body[part]);
+		}
+		snake.direction = direction;
 		
-		client.snake = new Snake();
-		client.snake.body = body;
-		client.snake.direction = direction;
+		client.snake = snake;
 
 		io.emit('spawn', {
 			id:clientid,
