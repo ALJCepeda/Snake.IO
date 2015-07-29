@@ -49,7 +49,7 @@ io.on('connection', function(socket){
 	//Called when client presses a button
 	socket.on('keydown', function(keycode) {
 		var direction = Utility.direction_fromKeycode(keycode);
-		if(direction && client.snake.direction != direction) {
+		if(direction && client.snake.direction != direction && client.snake.direction != Utility.direction_opposite(direction)) {
 			updateDirection(client.id, direction);
 		}
 	});
