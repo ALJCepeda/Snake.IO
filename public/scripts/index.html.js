@@ -12,14 +12,15 @@ var cw = 10;
 var score = 0;
 var id = 0;
 
+var food = 
 //This is where the server configures the client
 //This is also where everything is initliazed
 socket.on('configure', function(data) {
 	id = data['id'];
-	console.log("Received id: "+id);
+	console.log("You're id: "+id);
 });
 
-socket.on('update', function(data) {
+socket.on('iteration', function(data) {
 	if(data['clients']) {
 		updateSnakes(data['clients']);	
 	}
@@ -27,6 +28,39 @@ socket.on('update', function(data) {
 	gameIteration();
 	refreshCanvas();
 });
+
+socket.on('collision', function(clientid) {
+	delete snakes[clientid];
+	console.log(clientid + ' collided with something');
+});
+
+socket.on('spawn', function(data) {
+	var clientid = data['id'];
+
+	var body = [];
+	for (var i = data['body'].length - 1; i >= 0; i--) {
+		var part = data['body'][i];
+		part = new Point(part.x, part.y);
+		body[i] = part;
+	}
+
+	var snake = new Snake();
+	snake.direction = data['direction'];
+	snake.body = body;
+
+	snakes[clientid] = snake;
+	console.log('Spawned snake for '+clientid);
+});
+
+socket.on('add', function(data) {
+	if(data['snake']) {
+
+	}
+
+	if(data['food']) {
+
+	}
+})
 
 //Lets add the keyboard controls now
 var keypress = [];
@@ -78,7 +112,7 @@ function drawGrid() {
 	//Lets paint the score
 	var score_text = "Score: " + score;
 	ctx.fillText(score_text, 5, h-5);
-}
+}	
 
 //Lets first create a generic function to paint points
 function drawPoint(point) {
@@ -101,17 +135,6 @@ function updateSnakes(clients) {
 
 		if(info['direction']) {
 			snakes[clientid].direction = info['direction'];
-		}
-
-		if(info['body']) {
-			var body = [];
-			for (var i = info['body'].length - 1; i >= 0; i--) {
-				var part = info['body'][i];
-				part = new Point(part.x, part.y);
-				body[i] = part;
-			}
-
-			snakes[clientid].body = body
 		}
 	}
 }

@@ -3,6 +3,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 var Point = require('./scripts/point.js');
+var Grid = require('./scripts/grid.js');
 var Snake = require('./scripts/snake.js');
 var Client = require('./scripts/client.js');
 var Utility = require('./scripts/utility.js');
@@ -19,12 +20,13 @@ app.get('/timer.js', function(req, res) { res.sendFile(__dirname + '/scripts/tim
 app.get('/utility.js', function(req, res) { res.sendFile(__dirname + '/scripts/utility.js'); });
 
 //Server
-http.listen(3000, function() { console.log('listening on *:3000'); });
+http.listen(3001, function() { console.log('listening on *:3000'); });
 
 //App logic
 var clients = [];
 var connected = 0;
 var clientUpdate = new ClientUpdate();
+var grid = new Grid();
 
 io.on('connection', function(socket){
 	console.log('User connected, id: '+socket.id+' total: '+connected);
@@ -60,13 +62,26 @@ gameTimer.iteration = function() {
 
 	for( var clientid in clients) {
 		var client = clients[clientid];
-		client.gameIteration();
+
+		if(client.snake) {
+			console.log(client.snake.head);
+			client.snake.step();
+			if(!grid.containsPoint(client.snake.head)) {
+				
+				client.snake = null;
+				io.emit('collision', clientid);
+			} else {
+				if(grid.removeFood(client.snake.head)) {
+					//Client just ate food
+				}
+			}
+		}
 	}
 
 	//If any clientUpdate occurred since the last iteration, broadcast them
 	var data = (!clientUpdate.empty()) ? clientUpdate.portable() : {};
 		
-	io.emit('update', data);
+	io.emit('iteration', data);
 	clientUpdate.clear();
 }
 gameTimer.start();
@@ -116,7 +131,10 @@ function spawn(clientid) {
 		client.snake.body = body;
 		client.snake.direction = direction;
 
-		clientUpdate.update(client.id, 'direction', direction);
-		clientUpdate.update(client.id, 'body', body);
+		io.emit('spawn', {
+			id:clientid,
+			direction:direction,
+			body:body
+		});
 	}
 }
