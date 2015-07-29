@@ -8,10 +8,12 @@ describe('Snake', function() {
 		it('should create a 5 cell snake in the left direction', function() {
 			var direction = 'right';
 			var opposite = 'left';
-			var body = (new Point(5,5)).walk(opposite, Snake.spawnSize);
+			var body = (new Point(5,5)).walk(opposite, 4);
 
 			var snake = new Snake();
-			snake.body = body;
+			for( var part in body ) {
+				snake.pushPart(body[part]);
+			}
 			snake.direction = direction;
 
 			assert.equal(snake.head.toString(), '(5,5)');
@@ -30,25 +32,27 @@ describe('Snake', function() {
 		it('should add a head to the snake', function() {
 			var direction = 'right';
 			var opposite = 'left'
-			var body = (new Point(5,5)).walk(opposite, Snake.spawnSize);
+			var body = (new Point(5,5)).walk(opposite, 4);
 
 			var snake = new Snake();
-			snake.body = body;
-			snake.direction = 'right';
+			for( var part in body ) {
+				snake.pushPart(body[part]);
+			}
+			snake.direction = direction;
 			
 			assert.equal(snake.head.toString(), '(5,5)');
 			assert.equal(snake.tail.toString(), '(1,5)');
 			assert.equal(snake.body.length, 5);
 			assert.equal(snake.next.toString(), '(6,5)');
 
-			snake.addHead();
+			snake.unshiftPart(snake.next);
 
 			assert.equal(snake.head.toString(), '(6,5)');
 			assert.equal(snake.tail.toString(), '(1,5)');
 			assert.equal(snake.body.length, 6);
 
 			snake.direction = 'down';
-			snake.addHead().addHead();
+			snake.unshiftPart(snake.next).unshiftPart(snake.next);
 
 			assert.equal(snake.head.toString(), '(6,7)');
 			assert.equal(snake.tail.toString(), '(1,5)');
@@ -58,10 +62,12 @@ describe('Snake', function() {
 		it('should move snake in the right direction', function() {
 			var direction = 'right';
 			var opposite = 'left';
-			var body = (new Point(5,5)).walk(opposite, Snake.spawnSize);
+			var body = (new Point(5,5)).walk(opposite, 4);
 
 			var snake = new Snake();
-			snake.body = body;
+			for( var part in body ) {
+				snake.pushPart(body[part]);
+			}
 			snake.direction = direction;
 
 			snake.step();
