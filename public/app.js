@@ -1,6 +1,7 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var fs = require('fs');
 
 var Point = require('./scripts/point.js');
 var Grid = require('./scripts/grid.js');
@@ -10,17 +11,30 @@ var Utility = require('./scripts/utility.js');
 var Timer = require('./scripts/timer.js');
 var ClientUpdate = require('./scripts/clientupdate.js');
 
+var isLocal = true;
 
+var clientScript = bundle_scripts([
+		'point.js',
+		'snake.js',
+		'utility.js',
+		'index.html.js',
+	]);
+
+if(!isLocal) {
+	//Removes comments and extra white spaces
+	clientScript = clientScript.replace(/(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)|(\/\/.*)/g, " ")
+	  							.replace(/\s+/g, " ");
+}
 //Router
-app.get('/', function(req, res){ res.sendFile(__dirname + '/views/index.html'); });
-app.get('/index.html.js', function(req, res) { res.sendFile(__dirname + '/scripts/index.html.js'); });
-app.get('/point.js', function(req, res) { res.sendFile(__dirname + '/scripts/point.js'); });
-app.get('/snake.js', function(req, res) { res.sendFile(__dirname + '/scripts/snake.js'); });
-app.get('/timer.js', function(req, res) { res.sendFile(__dirname + '/scripts/timer.js'); });
-app.get('/utility.js', function(req, res) { res.sendFile(__dirname + '/scripts/utility.js'); });
+app.get('/', function(req, res){ 
+	var html = fs.readFileSync(__dirname + '/views/index.html'); 
+	html = html.toString().replace("{{gitChecksum}}", gitCheck());
+	res.send(html);
+});
+app.get("/index_"+gitCheck()+".js", function(req, res) { res.send(clientScript); });
 
 //Server
-http.listen(3000, function() { console.log('listening on *:3000'); });
+http.listen(8001, function() { console.log('listening on *:8001'); });
 
 //App logic
 var clients = [];
@@ -29,6 +43,31 @@ var clientUpdate = new ClientUpdate();
 var grid = new Grid();
 grid.pointWidth = 50;
 grid.cellWidth = 10;
+
+
+function gitCheck() {
+	var branch = fs.readFileSync(__dirname + '/../.git/refs/heads/master');
+	return branch.toString().replace(/\r?\n|\r/g, "");
+}
+
+function bundle_scripts(scripts) {
+	var scriptsDir = __dirname + '/scripts/';
+
+	var result = '';
+	for (var i = scripts.length - 1; i >= 0; i--) {
+		var scriptName = scripts[i];
+		result = result + fs.readFileSync(scriptsDir + scriptName).toString();
+	}
+	return result;
+}
+
+function appendProperties(obj) {
+	var result = '';
+	for(var key in obj) {
+		result = result + obj[key];
+	}
+	return result;
+}
 
 app.get('/info', function(req, res) {
 	res.header('Access-Control-Allow-Origin', '*');

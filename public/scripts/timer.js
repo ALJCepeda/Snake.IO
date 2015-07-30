@@ -16,7 +16,6 @@ Timer.prototype.start = function() { Timer.start(this); };
 Timer.prototype.portable = function() { return Timer.portable(this); };
 
 Timer.update = function(timer, milliseconds) {
-	console.log("Clear id: " + timer.id);
 	clearInterval(timer.id);
 
 	if(milliseconds > 0) {
@@ -25,7 +24,6 @@ Timer.update = function(timer, milliseconds) {
 }
 Timer.start = function(timer) { 
 	timer.id = setInterval(timer._iteration, timer.countdown);
-	console.log("Timer id: " + timer.id);
 };
 
 if (typeof module !== "undefined" && module.exports) {

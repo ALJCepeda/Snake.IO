@@ -1,6 +1,6 @@
 function Snake() {
 	 this.body = [];
-	 this.direction;
+	 this.direction = "";
 	 this.points = {};
 }
 
@@ -12,7 +12,7 @@ Object.defineProperty(Snake.prototype, 'tail', {
 });
 Object.defineProperty(Snake.prototype, 'next', {
 	get:function() { return Snake.next(this); }
-})
+});
 Snake.prototype.portable = function() { return Snake.portable(this); };
 Snake.prototype.containsPoint = function(point) { return Snake.containsPoint(this, point); };
 Snake.prototype.pushPart = function(point) { return Snake.pushPart(this, point); };
@@ -42,15 +42,15 @@ Snake.unshiftPart = function(snake, point) {
 	snake.body.unshift(point);
 	snake.points[point.toString()] = true;
 	return snake;
-}
+};
 Snake.pushPart = function(snake, point) {
 	snake.body.push(point);
 	snake.points[point.toString()] = true;
 	return snake;
-}
+};
 Snake.containsPoint = function(snake, point) {
 	return snake.points[point.toString()] === true;
-}
+};
 
 if (typeof module !== "undefined" && module.exports) {
     module.exports = Snake;

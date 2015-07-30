@@ -60,7 +60,7 @@ socket.on('add', function(data) {
 	if(data['food']) {
 
 	}
-})
+});
 
 //Lets add the keyboard controls now
 var keypress = [];

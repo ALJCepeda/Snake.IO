@@ -1,4 +1,4 @@
-function Utility() { };
+function Utility() { }
 
 
 Object.defineProperty(Object.prototype, 'isEmpty', {
@@ -16,10 +16,10 @@ Utility.direction_fromKeycode  = function (key) {
 		38:'up',
 		39:'right',
 		40:'down'
-	}
+	};
 
 	return cases[key] || '';
-}
+};
 
 Utility.direction_opposite = function (direction) {
 	var cases = {
@@ -28,7 +28,7 @@ Utility.direction_opposite = function (direction) {
 	};
 
 	return cases[direction] || '';
-}
+};
 
 if (typeof module !== "undefined" && module.exports) {
     module.exports = Utility;

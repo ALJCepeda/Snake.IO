@@ -26,7 +26,7 @@ Point.up = function(point) {
 };
 Point.step = function(point, direction) {
 	return Point.action(direction)(point);
-}
+};
 Point.walk = function(point, direction, length) {
 	var next = Point.action(direction);
 	var points = [point];
@@ -44,7 +44,7 @@ Point.action = function(direction) {
 		down: Point.down,
 		left: Point.left,
 		right: Point.right
-	}
+	};
 
 	var action = cases[direction] || '';
 	if(!action) {
@@ -56,13 +56,13 @@ Point.action = function(direction) {
 	}
 
 	return action;
-}
+};
 Point.toString = function(point) {
 	return '('+point.x+','+point.y+')';
-}
+};
 Point.equals = function(a, b) {
 	return (a.x === b.x) && (a.y === b.y);
-}
+};
 
 if (typeof module !== "undefined" && module.exports) {
     module.exports = Point;
