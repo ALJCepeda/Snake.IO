@@ -1,5 +1,6 @@
 var socket = io();
 var snakes = { };
+var clients = [];
 
 //Canvas stuff
 var canvas = document.getElementById('canvas');
@@ -12,17 +13,17 @@ var cw = 10;
 var score = 0;
 var id = 0;
 
-var food = 
 //This is where the server configures the client
 //This is also where everything is initliazed
 socket.on('configure', function(data) {
 	id = data['id'];
-	console.log("You're id: "+id);
+	debugger;
+	update_clients(data['clients']);
 });
 
 socket.on('iteration', function(data) {
 	if(data['clients']) {
-		updateSnakes(data['clients']);	
+		update_manySnakes(data['clients']);	
 	}
 
 	gameIteration();
@@ -128,12 +129,17 @@ function drawPoint(point) {
 	ctx.strokeRect(x*cw, y*cw, cw, cw);
 }
 
-function updateSnakes(clients) {
+function update_clients(clients) {
 	for( var clientid in clients ) {
-		var info = clients[clientid];
+		update_snake(clientid, clients[clientid]);
+	}
+}
 
-		if(info['direction'] && snakes[clientid]) {
-			snakes[clientid].direction = info['direction'];
+function update_snake(clientid, data) {
+	if(snakes[clientid]) {
+
+		if(data['direction']) {
+			snakes[clientid].direction = data['direction'];
 		}
 	}
 }

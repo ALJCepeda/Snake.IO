@@ -17,9 +17,9 @@ describe('Snake', function() {
 			snake.direction = direction;
 
 			assert.equal(snake.head.toString(), '(5,5)');
-			assert.equal(body[1].toString(), '(4,5)');
-			assert.equal(body[2].toString(), '(3,5)');
-			assert.equal(body[3].toString(), '(2,5)');
+			assert.equal(snake.body[1].toString(), '(4,5)');
+			assert.equal(snake.body[2].toString(), '(3,5)');
+			assert.equal(snake.body[3].toString(), '(2,5)');
 			assert.equal(snake.tail.toString(), '(1,5)');
 			
 			assert.equal(snake.next.toString(), '(6,5)');

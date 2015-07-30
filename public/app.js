@@ -11,8 +11,15 @@ var Utility = require('./scripts/utility.js');
 var Timer = require('./scripts/timer.js');
 var ClientUpdate = require('./scripts/clientupdate.js');
 
-var isLocal = true;
+//Global data
+var clients = [];
+var connected = 0;
+var clientUpdate = new ClientUpdate();
+var grid = new Grid();
+grid.pointWidth = 50;
+grid.cellWidth = 10;
 
+var isLocal = true;
 var clientScript = bundle_scripts([
 		'point.js',
 		'snake.js',
@@ -36,38 +43,6 @@ app.get("/index_"+gitCheck()+".js", function(req, res) { res.send(clientScript);
 //Server
 http.listen(8001, function() { console.log('listening on *:8001'); });
 
-//App logic
-var clients = [];
-var connected = 0;
-var clientUpdate = new ClientUpdate();
-var grid = new Grid();
-grid.pointWidth = 50;
-grid.cellWidth = 10;
-
-
-function gitCheck() {
-	var branch = fs.readFileSync(__dirname + '/../.git/refs/heads/master');
-	return branch.toString().replace(/\r?\n|\r/g, "");
-}
-
-function bundle_scripts(scripts) {
-	var scriptsDir = __dirname + '/scripts/';
-
-	var result = '';
-	for (var i = scripts.length - 1; i >= 0; i--) {
-		var scriptName = scripts[i];
-		result = result + fs.readFileSync(scriptsDir + scriptName).toString();
-	}
-	return result;
-}
-
-function appendProperties(obj) {
-	var result = '';
-	for(var key in obj) {
-		result = result + obj[key];
-	}
-	return result;
-}
 
 app.get('/info', function(req, res) {
 	res.header('Access-Control-Allow-Origin', '*');
@@ -157,7 +132,7 @@ function configureClient(clientid) {
 
 	if(client) {
 		var config = new ClientUpdate();
-		allSnakes(config);
+		allClients(config);
 
 		config.root = { id:clientid };
 		config.removeClient(clientid);
@@ -166,10 +141,13 @@ function configureClient(clientid) {
 	}
 }
 
-function allSnakes(clientUpdate) {
+function allClients(clientUpdate) {
+	clientUpdate.root['connected'] = [];
 	for( var clientid in clients ) {
 		var client = clients[clientid];
 
+		clientUpdate.update(clientid, 'nickname', 'Snake');
+		
 		if(client.snake) {
 			clientUpdate.update(clientid, 'body', client.snake.body);
 		}
@@ -198,4 +176,20 @@ function spawn(clientid) {
 			body:body
 		});
 	}
+}
+
+function gitCheck() {
+	var branch = fs.readFileSync(__dirname + '/../.git/refs/heads/master');
+	return branch.toString().replace(/\r?\n|\r/g, "");
+}
+
+function bundle_scripts(scripts) {
+	var scriptsDir = __dirname + '/scripts/';
+
+	var result = '';
+	for (var i = scripts.length - 1; i >= 0; i--) {
+		var scriptName = scripts[i];
+		result = result + fs.readFileSync(scriptsDir + scriptName).toString();
+	}
+	return result;
 }
