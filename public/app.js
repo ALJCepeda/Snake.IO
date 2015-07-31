@@ -19,6 +19,7 @@ var grid = new Grid();
 grid.pointWidth = 50;
 grid.cellWidth = 10;
 
+var minFood = 5;
 var isLocal = true;
 var clientScript = bundle_scripts([
 		'point.js',
@@ -105,7 +106,14 @@ gameTimer.iteration = function() {
 				io.emit('collision', clientid);
 			} else {
 				if(grid.removeFood(client.snake.next)) {
-					//Client just ate food
+					io.emit('ate', {
+						clientid: clientid,
+						foodid: client.snake.next.toString()
+					});
+					
+					//Add a tail which will appear once the snake takes a step
+					var newPart = new Point(client.snake.tail.x, client.snake.tail.y);
+					client.snake.pushPart(newPart);
 				}
 
 				client.snake.step();
@@ -115,11 +123,33 @@ gameTimer.iteration = function() {
 
 	//If any clientUpdate occurred since the last iteration, broadcast them
 	var data = (!clientUpdate.empty()) ? clientUpdate.portable() : {};
-		
 	io.emit('iteration', data);
+
 	clientUpdate.clear();
+
+	var foodNeeded = minFood - grid.foodCount;
+	if(foodNeeded > 0) {
+		createFood(foodNeeded);
+	}
 }
 gameTimer.start();
+
+function createFood(count) {
+	for (var i = count-1; i >= 0; i--) {
+		var x = Math.floor((Math.random() * (grid.pointWidth - 1)) + 1);
+		var y = Math.floor((Math.random() * (grid.pointWidth - 1)) + 1);
+
+		var food = new Point(x, y);
+		food.color = Utility.random_color();
+
+		if(grid.hasFood(food)) {
+			count--;
+		} else {
+			grid.addFood(food);
+			clientUpdate.addFood(food.toString(), food);
+		}
+	};
+}
 
 function configureClient(clientid) {
 	var client = clients[clientid];
@@ -129,6 +159,7 @@ function configureClient(clientid) {
 		allClients(config);
 
 		config.root = { id:clientid };
+		config.food = grid.food;
 		config.removeClient(clientid);
 
 		client.socket.emit('configure', config.portable());	

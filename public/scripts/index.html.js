@@ -1,6 +1,7 @@
 var socket = io();
 var snakes = { };
 var clients = [];
+var food = { };
 
 //Canvas stuff
 var canvas = document.getElementById('canvas');
@@ -17,17 +18,11 @@ var id = 0;
 //This is also where everything is initliazed
 socket.on('configure', function(data) {
 	id = data['id'];
-
-	//This will spawn players that are already connected and spawned
-	update_clients(data['clients']);
+	update(data);
 });
 
 socket.on('iteration', function(data) {
-	//Unlike the other events, we don't always expect a client to be updated
-	if(data['clients']) {
-		//The thing we expect here is an action on a snake
-		update_clients(data['clients']);	
-	}
+	update(data);
 
 	//Move all snakes
 	gameIteration();
@@ -43,7 +38,20 @@ socket.on('collision', function(clientid) {
 
 socket.on('spawn', function(data) {
 	//This is called whenever a client needs a new snake somewhere
-	update_clients(data['clients']);
+	update(data);
+});
+
+socket.on('ate', function(data) {
+	var clientid = data['clientid'];
+	var foodid = data['foodid'];
+
+	if(snakes[clientid]) {
+		var snake = snakes[clientid];
+		var newPart = new Point(snake.tail.x, snake.tail.y);
+		snakes[clientid].pushPart(newPart);
+
+		delete food[foodid];
+	}
 });
 
 socket.on('disconnected', function(clientid) {
@@ -83,6 +91,10 @@ function refreshCanvas() {
 	for(var clientid in snakes) {
 		drawSnake(snakes[clientid]);
 	}
+
+	for(var foodid in food) {
+		drawPoint(food[foodid], food[foodid].color);
+	}
 }
 
 function drawSnake(snake) {
@@ -115,11 +127,30 @@ function drawPoint(point, color) {
 	ctx.strokeRect(x*cw, y*cw, cw, cw);
 }
 
+function update(data) {
+	if(data['clients']) {
+		update_clients(data['clients']);
+	}
+
+	if(data['food']) {
+		update_food(data['food']);
+	}	
+}
+
+function update_food(data) {
+	for( var key in data ) {
+		var point = new Point(data[key]['x'], data[key]['y']);
+		point.color = data[key]['color'];
+
+		food[key] = point;
+	}
+}
+
 //The idea is to feed it generic client data, and for it for figure out what to do with it
-function update_clients(clients) {
-	for( var clientid in clients ) {
+function update_clients(data) {
+	for( var clientid in data ) {
 		//Attempt to update snake
-		update_snake(clientid, clients[clientid]);
+		update_snake(clientid, data[clientid]);
 	}
 }
 
@@ -127,12 +158,12 @@ function update_snake(clientid, data) {
 	//If server gave us a body, lets give the client a snake
 	if(data['body']) {
 		var snake = new Snake();
-		for( var key in data['body'] ) {
-			var coord = data['body'][key];
+		for( var index in data['body'] ) {
+			var coord = data['body'][index];
 			var part = new Point(coord['x'], coord['y']);
-
 			snake.pushPart(part);	
 		}
+
 		snakes[clientid] = snake;
 		console.log('Created new snake for '+clientid);
 	}
@@ -144,6 +175,7 @@ function update_snake(clientid, data) {
 		if(data['direction']) {
 			snake.direction = data['direction'];
 		}
+
 		if(data['color']) {
 			snake.color = data['color'];
 		}

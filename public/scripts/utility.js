@@ -2,12 +2,12 @@ function Utility() { }
 
 
 Object.defineProperty(Object.prototype, 'isEmpty', {
-  get: function() {
-    for(var prop in this) {
-		return false;
+	get: function() {
+	    for(var prop in this) {
+			return false;
+		}
+		return true;
 	}
-	return true;
-  }
 });
 
 Utility.direction_fromKeycode  = function (key) {
@@ -36,7 +36,7 @@ Utility.random_color = function() {
     for (var i = 0; i < 6; i++ ) {
         color += letters[Math.floor(Math.random() * 16)];
     }
-    
+
     return color;
 }
 if (typeof module !== "undefined" && module.exports) {

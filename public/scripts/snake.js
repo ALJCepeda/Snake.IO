@@ -33,25 +33,31 @@ Snake.portable = function(snake) {
 		color:snake.color
 	};
 };
-Snake.popTail = function(snake) { return snake.body.pop(); };
-Snake.step = function(snake) { 
-	var tail = snake.unshiftPart(snake.next).popTail();
-	delete snake.points[tail.toString()];
+Snake.popTail = function(snake) { 
+	var tail = snake.body.pop();
 
+	if(tail !== undefined) {
+		delete snake.points[tail.toString()];
+	}
+
+	return tail;
+};
+Snake.step = function(snake) { 
+	snake.unshiftPart(snake.next).popTail();
 	return snake;
 };
 Snake.unshiftPart = function(snake, point) {
 	snake.body.unshift(point);
-	snake.points[point.toString()] = true;
+	snake.points[point.toString()] = point;
 	return snake;
 };
 Snake.pushPart = function(snake, point) {
 	snake.body.push(point);
-	snake.points[point.toString()] = true;
+	snake.points[point.toString()] = point;
 	return snake;
 };
 Snake.containsPoint = function(snake, point) {
-	return snake.points[point.toString()] === true;
+	return snake.points.hasOwnProperty(point.toString());
 };
 
 if (typeof module !== "undefined" && module.exports) {
