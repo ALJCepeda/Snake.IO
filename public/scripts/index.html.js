@@ -32,10 +32,10 @@ socket.on('iteration', function(data) {
 	update(data);
 
 	//Move all snakes
-	gameIteration();
+	game_iteration();
 
 	//Redraw everything
-	refreshCanvas();
+	refresh_canvas();
 });
 
 socket.on('spawn', function(data) {
@@ -64,7 +64,7 @@ document.addEventListener('keydown', function(e) {
 	};
 });
 
-function gameIteration() {
+function game_iteration() {
 	for(var clientid in snakes) {
 		snakes[clientid].step();
 	};
@@ -76,26 +76,26 @@ function gameIteration() {
 	};        
 };
 
-function refreshCanvas() {
-	drawGrid();
+function refresh_canvas() {
+	draw_grid();
 
 	for(var foodid in food) {
-		drawPoint(food[foodid], food[foodid].color);
+		draw_point(food[foodid], food[foodid].color);
 	};
-	
+
 	for(var clientid in snakes) {
-		drawSnake(snakes[clientid]);
+		draw_snake(snakes[clientid]);
 	};
 };
 
-function drawSnake(snake) {
+function draw_snake(snake) {
 	for (var i = snake.body.length - 1; i >= 0; i--) {
 		var part = snake.body[i];
-		drawPoint(part, snake.color);
+		draw_point(part, snake.color);
 	};
 };
 
-function drawGrid() {
+function draw_grid() {
 	//To avoid the snake trail we need to paint the BG on every frame
 	//Lets paint the canvas now
 	ctx.fillStyle = "white";
@@ -109,7 +109,7 @@ function drawGrid() {
 };
 
 //Lets first create a generic function to paint points
-function drawPoint(point, color) {
+function draw_point(point, color) {
 	var x = point.x;
 	var y = point.y;
 
