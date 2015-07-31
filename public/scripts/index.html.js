@@ -24,7 +24,7 @@ socket.on('configure', function(data) {
 
 	canvas.width = width = cw * pw;
 	canvas.height = height = cw * pw;
-	
+
 	update(data);
 });
 
@@ -38,30 +38,9 @@ socket.on('iteration', function(data) {
 	refreshCanvas();
 });
 
-socket.on('collisions', function(collisions) {
-	for (var i = collisions.length - 1; i >= 0; i--) {
-		var clientid = collisions[i];
-		delete snakes[clientid];
-
-		console.log(clientid + ' collided with something');
-	};
-});
-
 socket.on('spawn', function(data) {
 	//This is called whenever a client needs a new snake somewhere
 	update(data);
-});
-
-socket.on('ate', function(ate) {
-	for( var clientid in ate ){
-		var foodid = ate[clientid];
-
-		var snake = snakes[clientid];
-		var newPart = new Point(snake.tail.x, snake.tail.y);
-		snakes[clientid].pushPart(newPart);
-
-		delete food[foodid];
-	}
 });
 
 socket.on('disconnected', function(clientid) {
@@ -141,14 +120,38 @@ function drawPoint(point, color) {
 };
 
 function update(data) {
+	if(data['collisions']) {
+		process_collisions(data['collisions']);
+	};
+
+	if(data['ate']) {
+		process_ate(data['ate']);
+	};
+
 	if(data['clients']) {
 		update_clients(data['clients']);
 	};
 
 	if(data['food']) {
 		update_food(data['food']);
-	};	
+	};
 };
+
+function process_ate(ate) {
+	for( var clientid in ate ){
+		snakes[clientid].pushTail();
+		delete food[ate[clientid]];
+	};
+}
+
+function process_collisions(collisions) {
+	for (var i = collisions.length - 1; i >= 0; i--) {
+		var clientid = collisions[i];
+		delete snakes[clientid];
+
+		console.log(clientid + ' collided with something');
+	};	
+}
 
 function update_food(data) {
 	for( var key in data ) {

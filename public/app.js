@@ -12,14 +12,15 @@ var Timer = require('./scripts/timer.js');
 var ClientUpdate = require('./scripts/clientupdate.js');
 
 //Global data
-var clients = [];
-var connected = 0;
+var clients = {};
+var connected = [];
+
 var clientUpdate = new ClientUpdate();
 var grid = new Grid();
 grid.pointWidth = 50;
 grid.cellWidth = 10;
 
-var isLocal = false;
+var isLocal = true;
 var spawnSize = 5;
 var minFood = 15;
 var clientScript = bundle_scripts([
@@ -59,23 +60,24 @@ app.get('/info', function(req, res) {
 });
 
 io.on('connection', function(socket){
-	connected++;
-	console.log('User connected, id: '+socket.id+' total: '+connected);
+	
 
 	//Record client connection
 	var client = new Client();
 	client.id = socket.id;
 	client.socket = socket;
-	clients[client.id] = client;
 	client.nickname = 'Snakeman';
 	
+	connected.push(client.id);
+	clients[client.id] = client;
 	//Called when this client disconnects
 	socket.on('disconnect', function(){
+		connected.splice(connected.indexOf(client.id), 1);
 		delete clients[client.id];
-		connected--;
 
 		io.emit('disconnected', client.id);
-		console.log('User disconnected, id '+client.id+' total: '+connected);
+		console.log('User disconnected, id '+client.id+' total: '+connected.length);
+		//client = null;
 	});
 
 	//Called when client presses a button
@@ -90,58 +92,87 @@ io.on('connection', function(socket){
 		}
 	});
 	
-	configureClient(client.id);
-	spawn(client.id);
+	configureClient(client);
+	spawn(client);
+
+	console.log('User connected, id: '+socket.id+' total: '+connected.length);
 });
 
 var gameTimer = new Timer(90);
 gameTimer.iteration = function() {
-	//Allow clients to process this iteration
+	//If any clientUpdate occurred since the last iteration, broadcast them
+	var data = (!clientUpdate.empty()) ? clientUpdate.portable() : {};
+	io.emit('iteration', data);
 
-	var collisions = [];
-	var ateFood = {}
+	clientUpdate.clear();
+
+	//Allow clients to process this iteration
 	for( var clientid in clients) {
 		var client = clients[clientid];
 
 		if(client.snake) {
 			if(!grid.containsPoint(client.snake.next) || client.snake.containsPoint(client.snake.next)) {
 				client.snake = null;
-				collisions.push(clientid);
+				clientUpdate.add_collision(client.id);
 			} else {
-				if(grid.removeFood(client.snake.next)) {
-					//Add a tail which will appear once the snake takes a step
-					var newPart = new Point(client.snake.tail.x, client.snake.tail.y);
-					client.snake.pushPart(newPart);
-
-					ateFood[clientid] = client.snake.next.toString();
-				}
-
 				client.snake.step();
 			}
 		}
 	}
 
-	//If any clientUpdate occurred since the last iteration, broadcast them
-	var data = (!clientUpdate.empty()) ? clientUpdate.portable() : {};
-	io.emit('iteration', data);
+	//Now resolve any issues with the snake positions
+	resolveSnakes();
 
-	if( collisions.length > 0 ) {
-		io.emit('collisions', collisions);
-	}
-
-	if(Object.keys(ateFood).length > 0) {
-		io.emit('ate', ateFood);
-	}
-
-	clientUpdate.clear();
-
-	//Post update stuff
 	var foodNeeded = minFood - grid.foodCount;
 	if(foodNeeded > 0) {
 		createFood(foodNeeded);
 	}
 }
 gameTimer.start();
+
+function resolveSnakes() {
+	var collisions = [];
+	var ateFood = {}
+
+	//After all snakes have been resolved, we check to see if any snakes collided with each other
+	for (var i = connected.length - 1; i >= 0; i--) {
+		var clientid = connected[i];
+		var client = clients[clientid];
+
+		if(client.snake) {
+			for (var x = i-1; x >= 0; x--) {
+				var otherid = connected[x];
+				var other = clients[otherid];
+
+				if(client.snake.head.equals(other.snake.head)) {
+					//Snakes collided into each other
+					if(client.snake.body.length === other.snake.body.length) {
+						client.snake = null;
+						other.snake = null;
+						clientUpdate.add_collision(client.id);
+						clientUpdate.add_collision(other.id);
+					} else {
+						var dead = (client.snake.body.length > other.snake.body.length) ? other : client;
+						dead.snake = null;
+						clientUpdate.add_collision(dead.id);
+					}
+				} else if(other.containsPoint(client.snake.head)) {
+					client.snake = null;
+					clientUpdate.add_collision(client.id);
+				}
+			};
+
+			//Check to see if the snake died before eating food
+			if(client.snake) {
+				if(grid.removeFood(client.snake.head)) {
+					//Add a tail which will appear once the snake takes a step
+					client.snake.pushTail();
+					clientUpdate.add_ate(client.id, client.snake.head.toString());
+				}
+			}
+		}
+	};
+}
 
 function createFood(count) {
 	for (var i = count-1; i >= 0; i--) {
@@ -155,29 +186,25 @@ function createFood(count) {
 			count--;
 		} else {
 			grid.addFood(food);
-			clientUpdate.addFood(food.toString(), food);
+			clientUpdate.add_food(food.toString(), food);
 		}
 	};
 }
 
-function configureClient(clientid) {
-	var client = clients[clientid];
+function configureClient(client) {
+	var config = new ClientUpdate();
+	allClients(config);
 
-	if(client) {
-		var config = new ClientUpdate();
-		allClients(config);
+	config.root = {
+		id:client.id,
+		cellWidth:grid.cellWidth,
+		pointWidth:grid.pointWidth
+	};
 
-		config.root = {
-			id:clientid,
-			cellWidth:grid.cellWidth,
-			pointWidth:grid.pointWidth
-		};
+	config.food = grid.food;
+	config.remove_client(client.id);
 
-		config.food = grid.food;
-		config.removeClient(clientid);
-
-		client.socket.emit('configure', config.portable());	
-	}
+	client.socket.emit('configure', config.portable());	
 }
 
 function allClients(clientUpdate) {
@@ -186,35 +213,31 @@ function allClients(clientUpdate) {
 		var client = clients[clientid];
 
 		if(client.snake) {
-			clientUpdate.clients[clientid] = client.snake.portable();
+			clientUpdate.clients[client.id] = client.snake.portable();
 		}
 
-		clientUpdate.update(clientid, 'nickname', client.nickname);
+		clientUpdate.update(client.id, 'nickname', client.nickname);
 	}
 }
 
-function spawn(clientid) {
-	var client = clients[clientid];
+function spawn(client) {
+	var direction = 'right';
+	var opposite = Utility.direction_opposite(direction);
+	var body = (new Point(5,5)).walk(opposite, spawnSize);
 
-	if(client) {
-		var direction = 'right';
-		var opposite = Utility.direction_opposite(direction);
-		var body = (new Point(5,5)).walk(opposite, spawnSize);
-
-		var snake = new Snake();
-		for( var part in body ) {
-			snake.pushPart(body[part]);
-		}
-		snake.direction = direction;
-		snake.color = Utility.random_color();
-
-		client.snake = snake;
-
-		var spawnInfo = new ClientUpdate();
-		spawnInfo.clients[clientid] = client.snake.portable();
-
-		io.emit('spawn', spawnInfo.portable());
+	var snake = new Snake();
+	for( var part in body ) {
+		snake.pushPart(body[part]);
 	}
+	snake.direction = direction;
+	snake.color = Utility.random_color();
+
+	client.snake = snake;
+
+	var spawnInfo = new ClientUpdate();
+	spawnInfo.clients[client.id] = client.snake.portable();
+
+	io.emit('spawn', spawnInfo.portable());
 }
 
 function gitCheck() {

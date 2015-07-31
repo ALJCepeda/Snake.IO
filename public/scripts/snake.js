@@ -1,3 +1,7 @@
+if (typeof module !== "undefined" && module.exports) {
+   var Point = require('./point.js');
+};
+
 function Snake() {
 	 this.body = [];
 	 this.direction = '';
@@ -18,6 +22,7 @@ Snake.prototype.portable = function() { return Snake.portable(this); };
 Snake.prototype.containsPoint = function(point) { return Snake.containsPoint(this, point); };
 Snake.prototype.pushPart = function(point) { return Snake.pushPart(this, point); };
 Snake.prototype.unshiftPart = function(point) { return Snake.unshiftPart(this, point); };
+Snake.prototype.pushTail = function() {	return Snake.pushTail(this); };
 Snake.prototype.popTail = function() { return Snake.popTail(this); };
 Snake.prototype.step = function() { return Snake.step(this); };
 Snake.prototype.setDirection = function(direction) { this.direction = direction; return this; };
@@ -41,6 +46,12 @@ Snake.popTail = function(snake) {
 	};
 
 	return tail;
+};
+Snake.pushTail = function(snake) {
+	var part = new Point(snake.tail.x, snake.tail.y);
+	snake.pushPart(part);
+	
+	return snake;
 };
 Snake.step = function(snake) { 
 	snake.unshiftPart(snake.next).popTail();
