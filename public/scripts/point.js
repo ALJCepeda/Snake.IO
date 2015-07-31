@@ -1,7 +1,7 @@
 function Point(x, y) {
 	this.x = x;
 	this.y = y;
-}
+};
 
 Point.prototype.toString = function() { return Point.toString(this); };
 Point.prototype.left = function() { return Point.left(this); };
@@ -34,7 +34,7 @@ Point.walk = function(point, direction, length) {
 	for(var i=0; i < length; i++){
 		point = next(point);
 		points.push(point);
-	}
+	};
 
 	return points;
 };
@@ -53,7 +53,7 @@ Point.action = function(direction) {
 			status: 'fatal', 
 			message: 'Unrecognized direction: ' + direction
 		};
-	}
+	};
 
 	return action;
 };
@@ -66,4 +66,4 @@ Point.equals = function(a, b) {
 
 if (typeof module !== "undefined" && module.exports) {
     module.exports = Point;
-}
+};

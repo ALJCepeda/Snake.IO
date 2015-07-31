@@ -3,7 +3,7 @@ function Snake() {
 	 this.direction = '';
 	 this.color = '';
 	 this.points = {};
-}
+};
 
 Object.defineProperty(Snake.prototype, 'head', {
 	get:function() { return Snake.head(this); }
@@ -38,7 +38,7 @@ Snake.popTail = function(snake) {
 
 	if(tail !== undefined) {
 		delete snake.points[tail.toString()];
-	}
+	};
 
 	return tail;
 };
@@ -62,4 +62,4 @@ Snake.containsPoint = function(snake, point) {
 
 if (typeof module !== "undefined" && module.exports) {
     module.exports = Snake;
-}
+};

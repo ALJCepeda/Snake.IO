@@ -24,9 +24,7 @@ socket.on('configure', function(data) {
 
 	canvas.width = width = cw * pw;
 	canvas.height = height = cw * pw;
-
-	console.log(width);
-	console.log(height);
+	
 	update(data);
 });
 
@@ -84,37 +82,40 @@ document.addEventListener('keydown', function(e) {
 
 		e.preventDefault();
 	    return false;
-	}
+	};
 });
 
 function gameIteration() {
 	for(var clientid in snakes) {
 		snakes[clientid].step();
-	}
+	};
 
 	var key = keypress.shift();
+
 	if(key) {
 		socket.emit('keydown', key); 
-	}           
-}
+	};        
+};
+
 function refreshCanvas() {
 	drawGrid();
 
 	for(var clientid in snakes) {
 		drawSnake(snakes[clientid]);
-	}
+	};
 
 	for(var foodid in food) {
 		drawPoint(food[foodid], food[foodid].color);
-	}
-}
+	};
+};
 
 function drawSnake(snake) {
 	for (var i = snake.body.length - 1; i >= 0; i--) {
 		var part = snake.body[i];
 		drawPoint(part, snake.color);
-	}
-}
+	};
+};
+
 function drawGrid() {
 	//To avoid the snake trail we need to paint the BG on every frame
 	//Lets paint the canvas now
@@ -126,7 +127,7 @@ function drawGrid() {
 	//Lets paint the score
 	var score_text = "Score: " + score;
 	ctx.fillText(score_text, 5, height-5);
-}	
+};
 
 //Lets first create a generic function to paint points
 function drawPoint(point, color) {
@@ -137,17 +138,17 @@ function drawPoint(point, color) {
 	ctx.fillRect(x*cw, y*cw, cw, cw);
 	ctx.strokeStyle = "white";
 	ctx.strokeRect(x*cw, y*cw, cw, cw);
-}
+};
 
 function update(data) {
 	if(data['clients']) {
 		update_clients(data['clients']);
-	}
+	};
 
 	if(data['food']) {
 		update_food(data['food']);
-	}	
-}
+	};	
+};
 
 function update_food(data) {
 	for( var key in data ) {
@@ -155,16 +156,16 @@ function update_food(data) {
 		point.color = data[key]['color'];
 
 		food[key] = point;
-	}
-}
+	};
+};
 
 //The idea is to feed it generic client data, and for it for figure out what to do with it
 function update_clients(data) {
 	for( var clientid in data ) {
 		//Attempt to update snake
 		update_snake(clientid, data[clientid]);
-	}
-}
+	};
+};
 
 function update_snake(clientid, data) {
 	//If server gave us a body, lets give the client a snake
@@ -174,11 +175,11 @@ function update_snake(clientid, data) {
 			var coord = data['body'][index];
 			var part = new Point(coord['x'], coord['y']);
 			snake.pushPart(part);	
-		}
+		};
 
 		snakes[clientid] = snake;
 		console.log('Created new snake for '+clientid);
-	}
+	};
 
 	//Otherwise check to see if snake exists before updating it's direction
 	if(snakes[clientid]) {
@@ -186,10 +187,10 @@ function update_snake(clientid, data) {
 
 		if(data['direction']) {
 			snake.direction = data['direction'];
-		}
+		};
 
 		if(data['color']) {
 			snake.color = data['color'];
-		}
-	}
-}
+		};
+	};
+};

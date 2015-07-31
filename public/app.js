@@ -19,8 +19,9 @@ var grid = new Grid();
 grid.pointWidth = 50;
 grid.cellWidth = 10;
 
-var minFood = 5;
-var isLocal = true;
+var isLocal = false;
+var spawnSize = 5;
+var minFood = 15;
 var clientScript = bundle_scripts([
 		'point.js',
 		'snake.js',
@@ -198,7 +199,7 @@ function spawn(clientid) {
 	if(client) {
 		var direction = 'right';
 		var opposite = Utility.direction_opposite(direction);
-		var body = (new Point(5,5)).walk(opposite, 100);
+		var body = (new Point(5,5)).walk(opposite, spawnSize);
 
 		var snake = new Snake();
 		for( var part in body ) {

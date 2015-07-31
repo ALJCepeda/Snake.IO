@@ -1,4 +1,4 @@
-function Utility() { }
+function Utility() { };
 
 
 Object.defineProperty(Object.prototype, 'isEmpty', {
@@ -38,7 +38,8 @@ Utility.random_color = function() {
     }
 
     return color;
-}
+};
+
 if (typeof module !== "undefined" && module.exports) {
     module.exports = Utility;
-}
+};
