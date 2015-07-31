@@ -79,12 +79,12 @@ function gameIteration() {
 function refreshCanvas() {
 	drawGrid();
 
-	for(var clientid in snakes) {
-		drawSnake(snakes[clientid]);
-	};
-
 	for(var foodid in food) {
 		drawPoint(food[foodid], food[foodid].color);
+	};
+	
+	for(var clientid in snakes) {
+		drawSnake(snakes[clientid]);
 	};
 };
 
