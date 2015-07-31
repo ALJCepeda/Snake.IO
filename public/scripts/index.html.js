@@ -46,14 +46,8 @@ socket.on('spawn', function(data) {
 	update_clients(data['clients']);
 });
 
-socket.on('add', function(data) {
-	if(data['snake']) {
-
-	}
-
-	if(data['food']) {
-
-	}
+socket.on('disconnected', function(clientid) {
+	delete snakes[clientid];
 });
 
 //Lets add the keyboard controls now
@@ -94,7 +88,7 @@ function refreshCanvas() {
 function drawSnake(snake) {
 	for (var i = snake.body.length - 1; i >= 0; i--) {
 		var part = snake.body[i];
-		drawPoint(part);
+		drawPoint(part, snake.color);
 	}
 }
 function drawGrid() {
@@ -111,11 +105,11 @@ function drawGrid() {
 }	
 
 //Lets first create a generic function to paint points
-function drawPoint(point) {
+function drawPoint(point, color) {
 	var x = point.x;
 	var y = point.y;
 
-	ctx.fillStyle = "blue";
+	ctx.fillStyle = color;
 	ctx.fillRect(x*cw, y*cw, cw, cw);
 	ctx.strokeStyle = "white";
 	ctx.strokeRect(x*cw, y*cw, cw, cw);
@@ -145,8 +139,13 @@ function update_snake(clientid, data) {
 
 	//Otherwise check to see if snake exists before updating it's direction
 	if(snakes[clientid]) {
+		var snake = snakes[clientid];
+
 		if(data['direction']) {
-			snakes[clientid].direction = data['direction'];
+			snake.direction = data['direction'];
+		}
+		if(data['color']) {
+			snake.color = data['color'];
 		}
 	}
 }

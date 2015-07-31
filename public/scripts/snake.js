@@ -1,6 +1,7 @@
 function Snake() {
 	 this.body = [];
-	 this.direction = "";
+	 this.direction = '';
+	 this.color = '';
 	 this.points = {};
 }
 
@@ -28,7 +29,8 @@ Snake.next = function(snake) { return snake.head.step(snake.direction); };
 Snake.portable = function(snake) {
 	return {
 		body:snake.body,
-		direction:snake.direction
+		direction:snake.direction,
+		color:snake.color
 	};
 };
 Snake.popTail = function(snake) { return snake.body.pop(); };

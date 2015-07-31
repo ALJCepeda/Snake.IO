@@ -2,10 +2,7 @@ function Client() {
 	this.id;
 	this.socket
 	this.snake;
-
-	this.gameIteration = function() {
-		this.snake.step();
-	}
+	this.nickname = 'Anonymouse';
 }
 
 if (typeof module !== "undefined" && module.exports) {

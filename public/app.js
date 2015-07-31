@@ -32,6 +32,10 @@ if(!isLocal) {
 	clientScript = clientScript.replace(/(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)|(\/\/.*)/g, " ")
 	  							.replace(/\s+/g, " ");
 }
+
+//Server
+http.listen(8001, function() { console.log('listening on *:8001'); });
+
 //Router
 app.get('/', function(req, res){ 
 	var html = fs.readFileSync(__dirname + '/views/index.html'); 
@@ -39,10 +43,6 @@ app.get('/', function(req, res){
 	res.send(html);
 });
 app.get("/index_"+gitCheck()+".js", function(req, res) { res.send(clientScript); });
-
-//Server
-http.listen(8001, function() { console.log('listening on *:8001'); });
-
 
 app.get('/info', function(req, res) {
 	res.header('Access-Control-Allow-Origin', '*');
@@ -65,12 +65,14 @@ io.on('connection', function(socket){
 	client.id = socket.id;
 	client.socket = socket;
 	clients[client.id] = client;
+	client.nickname = 'Snakeman';
 	
 	//Called when this client disconnects
 	socket.on('disconnect', function(){
 		delete clients[client.id];
 		connected--;
 
+		io.emit('disconnected', client.id);
 		console.log('User disconnected, id '+client.id+' total: '+connected);
 	});
 
@@ -80,7 +82,8 @@ io.on('connection', function(socket){
 
 		if(client.snake) {
 			if(direction && client.snake.direction != direction && client.snake.direction != Utility.direction_opposite(direction)) {
-				updateDirection(client.id, direction);
+				client.snake.direction = direction;
+				clientUpdate.update(client.id, 'direction', direction);
 			}
 		}
 	});
@@ -118,15 +121,6 @@ gameTimer.iteration = function() {
 }
 gameTimer.start();
 
-function updateDirection(clientid, direction) {
-	var client = clients[clientid];
-
-	if(client) {
-		client.snake.direction = direction;
-		clientUpdate.update(clientid, 'direction', direction);
-	}
-}
-
 function configureClient(clientid) {
 	var client = clients[clientid];
 
@@ -146,12 +140,11 @@ function allClients(clientUpdate) {
 	for( var clientid in clients ) {
 		var client = clients[clientid];
 
-		clientUpdate.update(clientid, 'nickname', 'Snake');
-
 		if(client.snake) {
-			clientUpdate.update(clientid, 'body', client.snake.body);
-			clientUpdate.update(clientid, 'direction', client.snake.direction);
+			clientUpdate.clients[clientid] = client.snake.portable();
 		}
+
+		clientUpdate.update(clientid, 'nickname', client.nickname);
 	}
 }
 
@@ -168,12 +161,12 @@ function spawn(clientid) {
 			snake.pushPart(body[part]);
 		}
 		snake.direction = direction;
-		
+		snake.color = Utility.random_color();
+
 		client.snake = snake;
 
 		var spawnInfo = new ClientUpdate();
-		spawnInfo.update(clientid, 'body', client.snake.body);
-		spawnInfo.update(clientid, 'direction', client.snake.direction);
+		spawnInfo.clients[clientid] = client.snake.portable();
 
 		io.emit('spawn', spawnInfo.portable());
 	}
