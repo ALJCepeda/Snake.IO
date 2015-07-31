@@ -6,9 +6,9 @@ var food = { };
 //Canvas stuff
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext("2d");
-var w = canvas.offsetWidth;
-var h = canvas.offsetHeight;
 
+var width = ctx.offsetWidth;
+var height = ctx.offsetHeight;
 //Lets save the cell width in a variable for easy control
 var cw = 10;
 var score = 0;
@@ -18,6 +18,15 @@ var id = 0;
 //This is also where everything is initliazed
 socket.on('configure', function(data) {
 	id = data['id'];
+	cw = data['cellWidth'];
+
+	var pw = data['pointWidth'];
+
+	canvas.width = width = cw * pw;
+	canvas.height = height = cw * pw;
+
+	console.log(width);
+	console.log(height);
 	update(data);
 });
 
@@ -31,9 +40,13 @@ socket.on('iteration', function(data) {
 	refreshCanvas();
 });
 
-socket.on('collision', function(clientid) {
-	delete snakes[clientid];
-	console.log(clientid + ' collided with something');
+socket.on('collisions', function(collisions) {
+	for (var i = collisions.length - 1; i >= 0; i--) {
+		var clientid = collisions[i];
+		delete snakes[clientid];
+
+		console.log(clientid + ' collided with something');
+	};
 });
 
 socket.on('spawn', function(data) {
@@ -41,11 +54,10 @@ socket.on('spawn', function(data) {
 	update(data);
 });
 
-socket.on('ate', function(data) {
-	var clientid = data['clientid'];
-	var foodid = data['foodid'];
+socket.on('ate', function(ate) {
+	for( var clientid in ate ){
+		var foodid = ate[clientid];
 
-	if(snakes[clientid]) {
 		var snake = snakes[clientid];
 		var newPart = new Point(snake.tail.x, snake.tail.y);
 		snakes[clientid].pushPart(newPart);
@@ -107,13 +119,13 @@ function drawGrid() {
 	//To avoid the snake trail we need to paint the BG on every frame
 	//Lets paint the canvas now
 	ctx.fillStyle = "white";
-	ctx.fillRect(0, 0, w, h);
+	ctx.fillRect(0, 0, width, height);
 	ctx.strokeStyle = "black";
-	ctx.strokeRect(0, 0, w, h);
+	ctx.strokeRect(0, 0, width, height);
 
 	//Lets paint the score
 	var score_text = "Score: " + score;
-	ctx.fillText(score_text, 5, h-5);
+	ctx.fillText(score_text, 5, height-5);
 }	
 
 //Lets first create a generic function to paint points

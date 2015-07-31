@@ -97,23 +97,22 @@ var gameTimer = new Timer(90);
 gameTimer.iteration = function() {
 	//Allow clients to process this iteration
 
+	var collisions = [];
+	var ateFood = {}
 	for( var clientid in clients) {
 		var client = clients[clientid];
 
 		if(client.snake) {
 			if(!grid.containsPoint(client.snake.next) || client.snake.containsPoint(client.snake.next)) {
 				client.snake = null;
-				io.emit('collision', clientid);
+				collisions.push(clientid);
 			} else {
 				if(grid.removeFood(client.snake.next)) {
-					io.emit('ate', {
-						clientid: clientid,
-						foodid: client.snake.next.toString()
-					});
-					
 					//Add a tail which will appear once the snake takes a step
 					var newPart = new Point(client.snake.tail.x, client.snake.tail.y);
 					client.snake.pushPart(newPart);
+
+					ateFood[clientid] = client.snake.next.toString();
 				}
 
 				client.snake.step();
@@ -125,8 +124,17 @@ gameTimer.iteration = function() {
 	var data = (!clientUpdate.empty()) ? clientUpdate.portable() : {};
 	io.emit('iteration', data);
 
+	if( collisions.length > 0 ) {
+		io.emit('collisions', collisions);
+	}
+
+	if(Object.keys(ateFood).length > 0) {
+		io.emit('ate', ateFood);
+	}
+
 	clientUpdate.clear();
 
+	//Post update stuff
 	var foodNeeded = minFood - grid.foodCount;
 	if(foodNeeded > 0) {
 		createFood(foodNeeded);
@@ -158,7 +166,12 @@ function configureClient(clientid) {
 		var config = new ClientUpdate();
 		allClients(config);
 
-		config.root = { id:clientid };
+		config.root = {
+			id:clientid,
+			cellWidth:grid.cellWidth,
+			pointWidth:grid.pointWidth
+		};
+
 		config.food = grid.food;
 		config.removeClient(clientid);
 

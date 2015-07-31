@@ -29,6 +29,8 @@ Grid.removeFood = function(grid, point) {
 };
 Grid.portable = function(grid) {
 	return {
+		pointWidth: grid.pointWidth,
+		cellWidth: grid.cellWidth,
 		food: grid.food
 	};
 }
