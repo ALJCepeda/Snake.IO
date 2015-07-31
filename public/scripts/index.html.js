@@ -17,16 +17,22 @@ var id = 0;
 //This is also where everything is initliazed
 socket.on('configure', function(data) {
 	id = data['id'];
-	debugger;
+
+	//This will spawn players that are already connected and spawned
 	update_clients(data['clients']);
 });
 
 socket.on('iteration', function(data) {
+	//Unlike the other events, we don't always expect a client to be updated
 	if(data['clients']) {
-		update_manySnakes(data['clients']);	
+		//The thing we expect here is an action on a snake
+		update_clients(data['clients']);	
 	}
 
+	//Move all snakes
 	gameIteration();
+
+	//Redraw everything
 	refreshCanvas();
 });
 
@@ -36,21 +42,8 @@ socket.on('collision', function(clientid) {
 });
 
 socket.on('spawn', function(data) {
-	var clientid = data['id'];
-
-	var body = [];
-	for (var i = data['body'].length - 1; i >= 0; i--) {
-		var part = data['body'][i];
-		part = new Point(part.x, part.y);
-		body[i] = part;
-	}
-
-	var snake = new Snake();
-	snake.direction = data['direction'];
-	snake.body = body;
-
-	snakes[clientid] = snake;
-	console.log('Spawned snake for '+clientid);
+	//This is called whenever a client needs a new snake somewhere
+	update_clients(data['clients']);
 });
 
 socket.on('add', function(data) {
@@ -82,8 +75,7 @@ document.addEventListener('keydown', function(e) {
 
 function gameIteration() {
 	for(var clientid in snakes) {
-		var snake = snakes[clientid];
-		snake.step();
+		snakes[clientid].step();
 	}
 
 	var key = keypress.shift();
@@ -129,15 +121,30 @@ function drawPoint(point) {
 	ctx.strokeRect(x*cw, y*cw, cw, cw);
 }
 
+//The idea is to feed it generic client data, and for it for figure out what to do with it
 function update_clients(clients) {
 	for( var clientid in clients ) {
+		//Attempt to update snake
 		update_snake(clientid, clients[clientid]);
 	}
 }
 
 function update_snake(clientid, data) {
-	if(snakes[clientid]) {
+	//If server gave us a body, lets give the client a snake
+	if(data['body']) {
+		var snake = new Snake();
+		for( var key in data['body'] ) {
+			var coord = data['body'][key];
+			var part = new Point(coord['x'], coord['y']);
 
+			snake.pushPart(part);	
+		}
+		snakes[clientid] = snake;
+		console.log('Created new snake for '+clientid);
+	}
+
+	//Otherwise check to see if snake exists before updating it's direction
+	if(snakes[clientid]) {
 		if(data['direction']) {
 			snakes[clientid].direction = data['direction'];
 		}

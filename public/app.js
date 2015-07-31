@@ -147,9 +147,10 @@ function allClients(clientUpdate) {
 		var client = clients[clientid];
 
 		clientUpdate.update(clientid, 'nickname', 'Snake');
-		
+
 		if(client.snake) {
 			clientUpdate.update(clientid, 'body', client.snake.body);
+			clientUpdate.update(clientid, 'direction', client.snake.direction);
 		}
 	}
 }
@@ -170,11 +171,11 @@ function spawn(clientid) {
 		
 		client.snake = snake;
 
-		io.emit('spawn', {
-			id:clientid,
-			direction:direction,
-			body:body
-		});
+		var spawnInfo = new ClientUpdate();
+		spawnInfo.update(clientid, 'body', client.snake.body);
+		spawnInfo.update(clientid, 'direction', client.snake.direction);
+
+		io.emit('spawn', spawnInfo.portable());
 	}
 }
 
