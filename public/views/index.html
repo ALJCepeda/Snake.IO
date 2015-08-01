@@ -3,13 +3,52 @@
 	<head>
 		<title>Snake.IO</title>
 		<style type="text/css">
-			#welcome {
+			#content {
+				height: 100%;
+				width: 100%;
 				position:absolute;
+
+				display: flex;
+				flex-direction:column;
+				align-items: center;
+  				justify-content: center;
+			}
+
+			#content > div {
+				width: 50%;
+				height: 50%;
+			}
+			#content > div > * {
+				text-align: center;
+			}
+			#welcome {
+				display:inline-block;
+			}
+			#tryAgain, #canvas {
+				display:none;
 			}
 		</style>
 	</head>
 <body>
-	<canvas id="canvas" />
+	<div id="content">
+		<div id="welcome">
+			<h1> Welcome to Snake.IO </h1>
+			<br />
+			<br />
+			<br />
+			<p> Click to join the game ... </p>
+		</div>
+
+		<div id="tryAgain">
+			<h1> Uh Oh looks like you hit something </h1>
+			<br />
+			<br />
+			<br />
+			<p> Click to respawn and try again ... </p>
+		</div>
+
+		<canvas id="canvas" />
+	</div>
 </body>
 
 <script src="/socket.io/socket.io.js"></script>

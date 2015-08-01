@@ -91,9 +91,13 @@ io.on('connection', function(socket){
 			}
 		}
 	});
+
+	//Called when client requests a spawn
+	socket.on('should_spawn', function() {
+		spawn(client);
+	});
 	
 	configure_client(client);
-	spawn(client);
 
 	console.log('User connected, id: '+socket.id+' total: '+connected.length);
 });

@@ -5,6 +5,9 @@ var food = { };
 
 //Canvas stuff
 var canvas = document.getElementById('canvas');
+var content = document.getElementById('content');
+var welcome = document.getElementById('welcome');
+var again = document.getElementById('tryAgain');
 var ctx = canvas.getContext("2d");
 
 var width = ctx.offsetWidth;
@@ -22,11 +25,42 @@ socket.on('configure', function(data) {
 
 	var pw = data['pointWidth'];
 
-	canvas.width = width = cw * pw;
-	canvas.height = height = cw * pw;
+	content.style.width = canvas.width = width = cw * pw;
+	content.style.height = canvas.height = height = cw * pw;
 
+	show_welcome();
 	update(data);
 });
+
+welcome.addEventListener('click', function(e) {
+	spawn_snake();
+});
+again.addEventListener('click', function(e) {
+	spawn_snake();
+});
+
+function spawn_snake() {
+	show_game();
+	socket.emit('should_spawn');
+};
+
+function show_welcome() {
+	canvas.style.display = 'none';
+	welcome.style.display = 'inline-block';
+	again.style.display = 'none';
+};
+
+function show_game() {
+	canvas.style.display = 'inline-block';
+	welcome.style.display = 'none';
+	again.style.display = 'none';
+}
+
+function show_tryAgain() {
+	canvas.style.display = 'none';
+	welcome.style.display = 'none';
+	again.style.display = 'inline-block';
+}
 
 socket.on('iteration', function(data) {
 	update(data);
@@ -50,7 +84,7 @@ socket.on('disconnected', function(clientid) {
 //Lets add the keyboard controls now
 var keypress = [];
 var lastKey = 0;
-document.addEventListener('keydown', function(e) {
+window.addEventListener('keydown', function(e) {
 	var key = e.which;
 	var cases = [37,38,39,40];
 
@@ -149,6 +183,9 @@ function process_collisions(collisions) {
 		var clientid = collisions[i];
 		delete snakes[clientid];
 
+		if(clientid === id) {
+			show_tryAgain();
+		}
 		console.log(clientid + ' collided with something');
 	};	
 }
