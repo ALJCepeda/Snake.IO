@@ -82,21 +82,37 @@ socket.on('disconnected', function(clientid) {
 });
 
 //Lets add the keyboard controls now
+
+window.addEventListener('keydown', function(e) {
+	pressed_button(e.which);
+	e.preventDefault();
+});
+document.getElementById('leftBtn').addEventListener('click', function(e) {
+	pressed_button(37);
+});
+document.getElementById('upBtn').addEventListener('click', function(e) {
+	pressed_button(38);
+});
+document.getElementById('rightBtn').addEventListener('click', function(e) {
+	pressed_button(39);
+});
+document.getElementById('downBtn').addEventListener('click', function(e) {
+	pressed_button(40);
+});
+
 var keypress = [];
 var lastKey = 0;
-window.addEventListener('keydown', function(e) {
-	var key = e.which;
+function pressed_button(keycode) {
+	console.log(keycode);
 	var cases = [37,38,39,40];
-
-	if(	cases.indexOf(key) !== -1  &&  lastKey !== key ) {
+	if(	cases.indexOf(keycode) !== -1  &&  lastKey !== keycode ) {
 		//The direction change will be applied on the server's next iteration
-		keypress.push(key);
-		lastKey = key;
+		keypress.push(keycode);
+		lastKey = keycode;
 
-		e.preventDefault();
 	    return false;
 	};
-});
+}
 
 function game_iteration() {
 	for(var clientid in snakes) {

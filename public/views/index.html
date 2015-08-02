@@ -27,6 +27,11 @@
 			#tryAgain, #canvas {
 				display:none;
 			}
+			#controls {
+				position: absolute;
+				bottom: 5px;
+				right: 5px;
+			}
 		</style>
 	</head>
 <body>
@@ -49,9 +54,14 @@
 
 		<canvas id="canvas" />
 	</div>
-</body>
 
-<img src="assets/arrow-up.png" />
+	<div id="controls">
+		<img id="upBtn" src="assets/arrow-up.png" />
+		<img id="leftBtn" src="assets/arrow-left.png" />
+		<img id="downBtn" src="assets/arrow-down.png" />
+		<img id="rightBtn" src="assets/arrow-right.png" />
+	</div>
+</body>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
