@@ -136,6 +136,8 @@ function refresh_canvas() {
 	for(var clientid in snakes) {
 		draw_snake(snakes[clientid]);
 	};
+
+	draw_score();
 };
 
 function draw_snake(snake) {
@@ -152,11 +154,15 @@ function draw_grid() {
 	ctx.fillRect(0, 0, width, height);
 	ctx.strokeStyle = "black";
 	ctx.strokeRect(0, 0, width, height);
-
-	//Lets paint the score
-	var score_text = "Score: " + score;
-	ctx.fillText(score_text, 5, height-5);
 };
+
+function draw_score() {
+	//Lets paint the score
+	ctx.fillStyle = "blue";
+	var score_text = "Score: " + score;
+	ctx.font="15px Georgia";
+	ctx.fillText(score_text, 5, height-5);
+}
 
 //Lets first create a generic function to paint points
 function draw_point(point, color) {
@@ -191,6 +197,10 @@ function process_ate(ate) {
 	for( var clientid in ate ){
 		snakes[clientid].pushTail();
 		delete food[ate[clientid]];
+
+		if(clientid == id) {
+			score++;
+		}
 	};
 }
 
