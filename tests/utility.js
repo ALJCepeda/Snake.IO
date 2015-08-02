@@ -1,5 +1,5 @@
 var assert = require('assert');
-var Utility = require('./../public/scripts/utility.js');
+var Utility = require('./../resources/scripts/utility.js');
 
 describe('Utility', function() {
 	describe('general', function() {

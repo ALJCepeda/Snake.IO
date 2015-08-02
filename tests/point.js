@@ -1,5 +1,5 @@
 var assert = require('assert');
-var Point = require('./../public/scripts/point.js');
+var Point = require('./../resources/scripts/point.js');
 
 describe('Point', function() {
 	describe('comparison', function() {

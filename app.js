@@ -1,15 +1,16 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
 
-var Point = require('./scripts/point.js');
-var Grid = require('./scripts/grid.js');
-var Snake = require('./scripts/snake.js');
-var Client = require('./scripts/client.js');
-var Utility = require('./scripts/utility.js');
-var Timer = require('./scripts/timer.js');
-var ClientUpdate = require('./scripts/clientupdate.js');
+var Point = require('./resources/scripts/point.js');
+var Grid = require('./resources/scripts/grid.js');
+var Snake = require('./resources/scripts/snake.js');
+var Client = require('./resources/scripts/client.js');
+var Utility = require('./resources/scripts/utility.js');
+var Timer = require('./resources/scripts/timer.js');
+var ClientUpdate = require('./resources/scripts/clientupdate.js');
 
 //Global data
 var clients = {};
@@ -24,10 +25,10 @@ var isLocal = true;
 var spawnSize = 5;
 var minFood = 100;
 var clientScript = bundle_scripts([
-		'point.js',
-		'snake.js',
-		'utility.js',
-		'index.html.js',
+		'resources/scripts/point.js',
+		'resources/scripts/snake.js',
+		'resources/scripts/utility.js',
+		'public/scripts/index.html.js',
 	]);
 
 if(!isLocal) {
@@ -41,10 +42,11 @@ http.listen(8001, function() { console.log('listening on *:8001'); });
 
 //Router
 app.get('/', function(req, res){ 
-	var html = fs.readFileSync(__dirname + '/views/index.html'); 
+	var html = fs.readFileSync(__dirname + '/public/views/index.html'); 
 	html = html.toString().replace("{{gitChecksum}}", gitCheck());
 	res.send(html);
 });
+app.use(express.static(__dirname + '/public'));
 app.get("/index_"+gitCheck()+".js", function(req, res) { res.send(clientScript); });
 
 app.get('/info', function(req, res) {
@@ -248,17 +250,15 @@ function spawn(client) {
 }
 
 function gitCheck() {
-	var branch = fs.readFileSync(__dirname + '/../.git/refs/heads/master');
+	var branch = fs.readFileSync(__dirname + '/.git/refs/heads/master');
 	return branch.toString().replace(/\r?\n|\r/g, "");
 }
 
 function bundle_scripts(scripts) {
-	var scriptsDir = __dirname + '/scripts/';
-
 	var result = '';
 	for (var i = scripts.length - 1; i >= 0; i--) {
 		var scriptName = scripts[i];
-		result = result + fs.readFileSync(scriptsDir + scriptName).toString();
+		result = result + fs.readFileSync(__dirname + '/' + scriptName).toString();
 	}
 	return result;
 }

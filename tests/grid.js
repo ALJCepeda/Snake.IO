@@ -1,6 +1,6 @@
 var assert = require('assert');
-var Grid = require('./../public/scripts/grid.js');
-var Point = require('./../public/scripts/point.js');
+var Grid = require('./../resources/scripts/grid.js');
+var Point = require('./../resources/scripts/point.js');
 
 describe('Grid', function() {
 	describe('generation', function() {

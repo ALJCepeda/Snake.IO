@@ -1,7 +1,7 @@
 var assert = require('assert');
-var Point = require('./../public/scripts/point.js');
-var Snake = require('./../public/scripts/snake.js');
-var Utility = require('./../public/scripts/utility.js');
+var Point = require('./../resources/scripts/point.js');
+var Snake = require('./../resources/scripts/snake.js');
+var Utility = require('./../resources/scripts/utility.js');
 
 describe('Snake', function() {
 	describe('creation', function() {
